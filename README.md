@@ -3,6 +3,11 @@
 A smorgasbord of features to be mixed into a future game world.
 
 
+### Notes
+
+The server database is not under source control.  If you wish to keep a server instance, back it up carefully.
+
+
 ### Resources
 
 - [Tutorials](http://github.com/evennia/evennia/wiki/Tutorials)
