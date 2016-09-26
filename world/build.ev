@@ -1,0 +1,15 @@
+#
+# Development batchfile - Feature Construction
+# Author: robbintt
+#
+# This batchfile is for constructing test features
+#
+# To load the file:
+# @batchcommand evennia_batchfiles.build
+#
+# For interactive load:
+# @batchcommand/interactive evennia_batchfiles.build
+
+
+
+@dig Character Generator : rooms.CharacterGeneratorRoom
