@@ -200,6 +200,11 @@ class DamageOrb(Object):
         self.db.damage = 5
         self.locks.add("get:false()")
 
+    def at_touched(self, looker):
+        if looker.db.health:
+            # health needs to know when it is changed and ensure
+            # it is between 0 and self.db.max)health
+            looker.db.health -= self.db.damage
 
 class HealingOrb(Object):
     """ An orb that removes damage when it is touched.
@@ -210,5 +215,10 @@ class HealingOrb(Object):
         self.db.healing = 5
         self.locks.add("get:false()")
 
+    def at_touched(self, looker):
+        if looker.db.health:
+            # health needs to know when it is changed and ensure
+            # it is between 0 and self.db.max)health
+            looker.db.health += self.db.healing
 
 
