@@ -28,6 +28,7 @@ A smorgasbord of features to be mixed into a future game world.
 
 ### Notes
 
+- [Ainneve](https://github.com/evennia/ainneve) - A full sample game
 - Admin can reload the server with `@reload`
 - The server remembers admin's `prelogout_location` by default and puts admin back
     - Same for all characters? Probably. Where is this from?
