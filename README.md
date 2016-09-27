@@ -42,6 +42,8 @@ The server database is not under source control.  If you wish to keep a server i
 - [Tutorials](http://github.com/evennia/evennia/wiki/Tutorials)
 - [Wiki](https://github.com/evennia/evennia/wiki)
 - [Game Directory Overview](https://github.com/evennia/evennia/wiki/Tutorial%20World%20Introduction)
+- [RP Mixins for Object, Room, Character](https://github.com/evennia/evennia/blob/master/evennia/contrib/rpsystem.py#L6)
+    
 
 ### Default Readme Tips
 
