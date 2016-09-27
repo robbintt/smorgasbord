@@ -12,7 +12,37 @@ inheritance.
 """
 from evennia import DefaultObject
 
-class Object(DefaultObject):
+class ExtendedDefaultObject(DefaultObject):
+    """ Adds additional functionality across the board
+
+    This object is mixed into: Room, Character, Object
+    Should it go other places?
+    """
+    
+    def at_touch(self, target):
+        """ Modelled after at_look, at_touch has its own lock: "touch"
+
+        
+        """
+        # This does not project the touch to the room, needs extended
+        if not target.access(self, "touch"):
+            try:
+                return "You could not touch the {}".format(target.get_display_name(self),)
+            except AttributeError:
+                return "You could not touch the {}".format(target.key,)
+        
+        target.at_touched(looker=self)
+        return "You reach out and touch the {}".format(target.get_display_name(self),)
+
+    def at_touched(self, looker=None):
+        """ This is called whenever someone touches this object.
+
+        Follows the same code pattern as at_desc, a function used by at_look
+        """
+        pass
+
+
+class Object(ExtendedDefaultObject):
     """
     This is the root typeclass object, implementing an in-game Evennia
     game object, such as having a location, being able to be
@@ -160,3 +190,25 @@ class Object(DefaultObject):
 
      """
     pass
+
+class DamageOrb(Object):
+    """ An orb that deals damage when it is touched.
+    """
+    def at_object_creation(self):
+        """
+        """
+        self.db.damage = 5
+        self.locks.add("get:false()")
+
+
+class HealingOrb(Object):
+    """ An orb that removes damage when it is touched.
+    """
+    def at_object_creation(self):
+        """
+        """
+        self.db.healing = 5
+        self.locks.add("get:false()")
+
+
+

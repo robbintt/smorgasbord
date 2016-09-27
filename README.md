@@ -3,7 +3,36 @@
 A smorgasbord of features to be mixed into a future game world.
 
 
+### Goals
+
+1. Player Body
+    1. Player should have body parts
+        1. For each body part zone there is an internal and external object
+            - e.g. internal chest, external chest
+        2. Player body parts should have both damage and scarring
+            - Damage is HP per body part
+            - Scarring reduces the body part's total HP
+            - Bleeding begins at a certain ratio of hp/total_hp and thus happens faster on scarred parts
+            - Bleeding reduces vitality at a fixed rate.
+            - FUTURE: Scarring removes certain commands
+    2. Player should have vitality
+    3. Player should regenerate vitality slowly.
+    4. If a hit is scored on a body part
+        1. Damage Vitality
+        2. Damage Body Part
+    5. Implementation:
+        1. There should be a body part class
+        2. Body parts can inherit from that class and become persistent_attributes
+    
+
+
 ### Notes
+
+- Admin can reload the server with `@reload`
+- The server remembers admin's `prelogout_location` by default and puts admin back
+    - Same for all characters? Probably. Where is this from?
+- Persistent attributes: `prelogout_location`, `desc`, `health`, health_max`
+    - Both health attributes are from my custom room, so it works.
 
 The server database is not under source control.  If you wish to keep a server instance, back it up carefully.
 

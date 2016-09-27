@@ -6,9 +6,9 @@ Rooms are simple containers that has no location of their own.
 """
 
 from evennia import DefaultRoom
+from objects import ExtendedDefaultObject
 
-
-class Room(DefaultRoom):
+class Room(DefaultRoom, ExtendedDefaultObject):
     """
     Rooms are like any Object, except their location is None
     (which is default). They also use basetype_setup() to
@@ -21,7 +21,7 @@ class Room(DefaultRoom):
     pass
 
 
-class CharacterGeneratorRoom(DefaultRoom):
+class CharacterGeneratorRoom(Room):
     """
     This is the base room type for character generation
     """

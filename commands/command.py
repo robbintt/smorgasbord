@@ -6,7 +6,10 @@ Commands describe the input the player can do to the game.
 """
 
 from evennia import Command as BaseCommand
-# from evennia import default_cmds
+
+# Was originally commented out, used in command tutorial for inheriting commands
+# https://github.com/evennia/evennia/wiki/Adding%20Command%20Tutorial
+from evennia import default_cmds
 
 
 class Command(BaseCommand):
@@ -182,3 +185,26 @@ class Command(BaseCommand):
 #            else:
 #                self.character = None
 #
+
+class CmdTouch(default_cmds.MuxCommand):
+    """ Supplies default behavior for 'touch'
+    """
+
+    key = "touch"
+    locks = "cmd:all()"
+
+    def func(self):
+        """ This actually does things
+        """
+        if not self.args:
+            self.caller.msg("Touch what?")
+        else:
+            target = self.caller.search(self.args)
+            if not target:
+                self.caller.msg("Touch what?")
+            else:
+                # 
+                # what is at_look ??  I need to make an at_touch
+                self.msg(self.caller.at_touch(target))
+
+        
