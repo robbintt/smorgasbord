@@ -13,10 +13,15 @@ inheritance.
 from evennia import DefaultObject
 
 class ExtendedDefaultObject(DefaultObject):
-    """ Adds additional functionality across the board
+    """ Mixin adds additional functionality across the board
 
     This object is mixed into: Room, Character, Object
     Should it go other places?
+
+    This object doesn't NEED to inherit from DefaultObject as it is
+    a mixin into descendants of DefaultObject.  
+    
+    The inheritance can probably just be removed with no effect.
     """
     
     def at_touch(self, target):
@@ -42,7 +47,7 @@ class ExtendedDefaultObject(DefaultObject):
         pass
 
 
-class Object(ExtendedDefaultObject):
+class Object(DefaultObject, ExtendedDefaultObject):
     """
     This is the root typeclass object, implementing an in-game Evennia
     game object, such as having a location, being able to be
