@@ -295,14 +295,21 @@ class MagicalWand(Object):
             """
             del toucher.ndb.busy
             try:
-                toucher.msg("The {} releases you from its grip.".format(self.get_display_name(toucher)))
+                toucher_message = "The {} releases you from its grip."
+                toucher.msg(toucher_message.format(self.get_display_name(toucher)))
             except AttributeError:
-                toucher.msg("The {} releases you from its grip.".format(self.key))
+                toucher.msg(toucher_message.format(self.key))
 
 
         if self.db.charge >= self.db.charge_max:
+            try:
+                toucher_message = "As you touch the {}, a flash of light floods the area."
+                toucher.msg(toucher_message.format(self.get_display_name(toucher)))
+            except AttributeError:
+                toucher.msg(toucher_message.format(self.key))
             self.location.msg_contents(
                 "The {item} cracks and a flash of light floods the area.",
+                exclude=toucher,
                 mapping={"toucher" : toucher, "item": self} )
 
             if self.db.touch_when_charged_delay > 0:
@@ -311,8 +318,14 @@ class MagicalWand(Object):
 
 
         elif self.db.charge > 0:
+            try:
+                toucher_message = "As you touch the {}, it glows weakly and abruptly goes dark."
+                toucher.msg(toucher_message.format(self.get_display_name(toucher)))
+            except AttributeError:
+                toucher.msg(toucher_message.format(self.key))
             self.location.msg_contents(
-                "The {item} weakly glows and then abruptly goes dark.",
+                "The {item} glows weakly and abruptly goes dark.",
+                exclude=toucher,
                 mapping={"toucher" : toucher, "item": self} )
         else:
             pass
@@ -325,12 +338,25 @@ class MagicalWand(Object):
 
         if self.db.charge < self.db.charge_max:
             self.db.charge += 1
+            try:
+                focuser_message = "As you focus on the {}, it glows faintly with a grey light."
+                focuser.msg(focuser_message.format(self.get_display_name(focuser)))
+            except AttributeError:
+                focuser.msg(toucher_message.format(self.key))
             self.location.msg_contents(
                 "The {item} glows faintly with a grey light.", 
+                exclude=focuser,
                 mapping={"item": self} )
         else:
+            # how can this be prevented from running a timer
+            try:
+                focuser_message = "As you focus on the {}, it pulses briefly and seems to reject additional charge."
+                focuser.msg(focuser_message.format(self.get_display_name(focuser)))
+            except AttributeError:
+                focuser.msg(toucher_message.format(self.key))
             self.location.msg_contents(
                 "The {item} pulses briefly, indicating it is fully charged.", 
+                exclude=focuser,
                 mapping={"item": self} )
 
 
