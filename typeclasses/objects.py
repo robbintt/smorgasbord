@@ -26,8 +26,6 @@ class ExtendedDefaultObject(object):
     
     def at_touch(self, target):
         """ Modelled after at_look, at_touch has its own lock: "touch"
-
-        
         """
         # This does not project the touch to the room, needs extended
         if not target.access(self, "touch"):
@@ -36,7 +34,7 @@ class ExtendedDefaultObject(object):
             except AttributeError:
                 return "You could not touch the {}".format(target.key,)
         
-        target.at_touched(looker=self)
+        target.at_touched(toucher=self)
         self.location.msg_contents(
                 "{toucher} touches {target}.", 
                 exclude=self,
@@ -46,7 +44,7 @@ class ExtendedDefaultObject(object):
         except AttributeError:
             return "You reach out and touch the {}".format(target.key,)
 
-    def at_touched(self, looker=None):
+    def at_touched(self, toucher=None):
         """ This is called whenever someone touches this object.
 
         Follows the same code pattern as at_desc, a function used by at_look
@@ -203,6 +201,7 @@ class Object(DefaultObject, ExtendedDefaultObject):
      """
     pass
 
+
 class DamageOrb(Object):
     """ An orb that deals damage when it is touched.
     """
@@ -213,11 +212,11 @@ class DamageOrb(Object):
         self.locks.add("get:false()")
         self.locks.add("touch:all()")
 
-    def at_touched(self, looker):
-        if looker.db.health:
+    def at_touched(self, toucher):
+        if toucher.db.health:
             # health needs to know when it is changed and ensure
             # it is between 0 and self.db.max)health
-            looker.db.health -= self.db.damage
+            toucher.db.health -= self.db.damage
 
 class HealingOrb(Object):
     """ An orb that removes damage when it is touched.
@@ -229,10 +228,10 @@ class HealingOrb(Object):
         self.locks.add("get:false()")
         self.locks.add("touch:all()")
 
-    def at_touched(self, looker):
-        if looker.db.health:
+    def at_touched(self, toucher):
+        if toucher.db.health:
             # health needs to know when it is changed and ensure
             # it is between 0 and self.db.max)health
-            looker.db.health += self.db.healing
+            toucher.db.health += self.db.healing
 
 
