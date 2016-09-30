@@ -272,8 +272,8 @@ class MagicalWand(Object):
     def at_object_creation(self):
         """
         """
-        self.charge = 0
-        self.charge_max = 5
+        self.db.charge = 0
+        self.db.charge_max = 5
         self.locks.add("get:all()")
         self.locks.add("touch:all()")
         self.locks.add("focus:all()")
@@ -281,25 +281,25 @@ class MagicalWand(Object):
     def at_touched(self, toucher):
         """
         """
-        if self.charge >= self.charge_max:
+        if self.db.charge >= self.db.charge_max:
             self.location.msg_contents(
                 "The {item} cracks and a flash of light floods the area.",
                 mapping={"toucher" : toucher, "item": self} )
-        elif self.charge > 0:
+        elif self.db.charge > 0:
             self.location.msg_contents(
                 "The {item} weakly glows and then abruptly goes dark.",
                 mapping={"toucher" : toucher, "item": self} )
         else:
             pass
 
-        self.charge = 0
+        self.db.charge = 0
 
     def at_focused(self, focuser):
         """
         """
 
-        if self.charge < self.charge_max:
-            self.charge += 1
+        if self.db.charge < self.db.charge_max:
+            self.db.charge += 1
             self.location.msg_contents(
                 "The {item} glows faintly with a grey light.", 
                 mapping={"item": self} )
