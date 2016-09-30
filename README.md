@@ -46,6 +46,11 @@ A smorgasbord of features to be mixed into a future game world.
     - Add a local chat channel with a different magic item and consider how to use.
     - Use the 'think' verb for chatting.
 
+6. First spell to implement - player viewer
+    - Cast it on a player and you can view whatever they view
+    - Needs discriminating mechanic for visions versus real sight
+
+
 ### Notes
 
 - If evennia says it has hanging `pid` then go in the /server/ folder and remove the offending files.
