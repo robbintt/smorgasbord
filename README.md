@@ -32,6 +32,10 @@ A smorgasbord of features to be mixed into a future game world.
         - "some" => some water, something common place, some dirt.
         - no article => characters
 
+3. Unique Item Tagging
+    1. Use tags for unique items, this can be used to define the indefinite article.
+    2. See [`tags` article](https://github.com/evennia/evennia/wiki/Tags)
+    3. Then you can search the world for unique items.
 
 
 ### Notes
