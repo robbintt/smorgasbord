@@ -30,9 +30,9 @@ class ExtendedDefaultObject(object):
         # This does not project the touch to the room, needs extended
         if not target.access(self, "touch"):
             try:
-                return "You could not touch the {}".format(target.get_display_name(self),)
+                return "You could not touch the {}.".format(target.get_display_name(self),)
             except AttributeError:
-                return "You could not touch the {}".format(target.key,)
+                return "You could not touch the {}.".format(target.key,)
         
         target.at_touched(toucher=self)
         self.location.msg_contents(
@@ -40,9 +40,9 @@ class ExtendedDefaultObject(object):
                 exclude=self,
                 mapping={"toucher": self, "target": target} )
         try:
-            return "You reach out and touch the {}".format(target.get_display_name(self),)
+            return "You reach out and touch the {}.".format(target.get_display_name(self),)
         except AttributeError:
-            return "You reach out and touch the {}".format(target.key,)
+            return "You reach out and touch the {}.".format(target.key,)
 
     def at_touched(self, toucher=None):
         """ This is called whenever someone touches this object.
