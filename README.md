@@ -52,6 +52,8 @@ A smorgasbord of features to be mixed into a future game world.
 
 7. Player guild option similar to eve corps would be very nice
 
+8. Concept of temporary experience or 'being sharp' at something
+    - Core skills may build but then you have a modifier for what you've done lately
 
 ### Notes
 
