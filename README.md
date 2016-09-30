@@ -37,6 +37,10 @@ A smorgasbord of features to be mixed into a future game world.
     2. See [`tags` article](https://github.com/evennia/evennia/wiki/Tags)
     3. Then you can search the world for unique items.
 
+4. 'focus' and 'touch'
+    - The `at_focused` and `at_touched` currently emit player touch output after these events fire.
+        - The effect is that an event like being poisoned fires before the touch is announced.
+
 
 ### Notes
 

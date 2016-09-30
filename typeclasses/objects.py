@@ -34,11 +34,13 @@ class ExtendedDefaultObject(object):
             except AttributeError:
                 return "You could not touch the {}.".format(target.key,)
         
-        target.at_touched(toucher=self)
         self.location.msg_contents(
                 "{toucher} touches {target}.", 
                 exclude=self,
                 mapping={"toucher": self, "target": target} )
+
+        target.at_touched(toucher=self)
+
         try:
             return "You reach out and touch the {}.".format(target.get_display_name(self),)
         except AttributeError:
@@ -61,11 +63,13 @@ class ExtendedDefaultObject(object):
             except AttributeError:
                 return "You could not focus on the {}.".format(target.key,)
         
-        target.at_focused(focuser=self)
         self.location.msg_contents(
                 "{focuser} concentrates on {target}.", 
                 exclude=self,
                 mapping={"focuser": self, "target": target} )
+
+        target.at_focused(focuser=self)
+
         try:
             return "You focus your magical senses on {}.".format(target.get_display_name(self),)
         except AttributeError:
@@ -268,11 +272,42 @@ class MagicalWand(Object):
     def at_object_creation(self):
         """
         """
+        self.charge = 0
+        self.charge_max = 5
         self.locks.add("get:all()")
         self.locks.add("touch:all()")
         self.locks.add("focus:all()")
 
+    def at_touched(self, toucher):
+        """
+        """
+        if self.charge >= self.charge_max:
+            self.location.msg_contents(
+                "The {item} cracks and a flash of light floods the area.",
+                mapping={"toucher" : toucher, "item": self} )
+        elif self.charge > 0:
+            self.location.msg_contents(
+                "The {item} weakly glows and then abruptly goes dark.",
+                mapping={"toucher" : toucher, "item": self} )
+        else:
+            pass
+
+        self.charge = 0
+
     def at_focused(self, focuser):
         """
         """
-        pass
+
+        if self.charge < self.charge_max:
+            self.charge += 1
+            self.location.msg_contents(
+                "The {item} glows faintly with a grey light.", 
+                mapping={"item": self} )
+        else:
+            self.location.msg_contents(
+                "The {item} pulses briefly, indicating it is fully charged.", 
+                mapping={"item": self} )
+
+
+
+
