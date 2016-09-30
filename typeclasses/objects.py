@@ -249,6 +249,10 @@ class DamageOrb(Object):
             # it is between 0 and self.db.max)health
             toucher.db.health -= self.db.damage
 
+        self.location.msg_contents(
+            "Black smoke coughs upwards from {item}.", 
+            mapping={"item": self} )
+
 class HealingOrb(Object):
     """ An orb that removes damage when it is touched.
     """
