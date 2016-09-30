@@ -57,6 +57,7 @@ A smorgasbord of features to be mixed into a future game world.
 
 ### Notes
 
+- `rlwrap telnet localhost 4000` - for line history in telnet
 - If evennia says it has hanging `pid` then go in the /server/ folder and remove the offending files.
 - [Ainneve](https://github.com/evennia/ainneve) - A full sample game
 - Admin can reload the server with `@reload`
