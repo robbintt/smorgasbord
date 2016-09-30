@@ -28,6 +28,7 @@ A smorgasbord of features to be mixed into a future game world.
 
 ### Notes
 
+- If evennia says it has hanging `pid` then go in the /server/ folder and remove the offending files.
 - [Ainneve](https://github.com/evennia/ainneve) - A full sample game
 - Admin can reload the server with `@reload`
 - The server remembers admin's `prelogout_location` by default and puts admin back
