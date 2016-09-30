@@ -41,6 +41,10 @@ A smorgasbord of features to be mixed into a future game world.
     - The `at_focused` and `at_touched` currently emit player touch output after these events fire.
         - The effect is that an event like being poisoned fires before the touch is announced.
 
+5. Add wearable item enables a global chat channel.
+    - Disable all standard chat and broadcasting on Player
+    - Add a local chat channel with a different magic item and consider how to use.
+    - Use the 'think' verb for chatting.
 
 ### Notes
 
