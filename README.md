@@ -50,6 +50,8 @@ A smorgasbord of features to be mixed into a future game world.
     - Cast it on a player and you can view whatever they view
     - Needs discriminating mechanic for visions versus real sight
 
+7. Player guild option similar to eve corps would be very nice
+
 
 ### Notes
 
