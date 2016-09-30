@@ -12,7 +12,7 @@ inheritance.
 """
 from evennia import DefaultObject
 
-class ExtendedDefaultObject(DefaultObject):
+class ExtendedDefaultObject(object):
     """ Mixin adds additional functionality across the board
 
     This object is mixed into: Room, Character, Object
@@ -37,7 +37,14 @@ class ExtendedDefaultObject(DefaultObject):
                 return "You could not touch the {}".format(target.key,)
         
         target.at_touched(looker=self)
-        return "You reach out and touch the {}".format(target.get_display_name(self),)
+        self.location.msg_contents(
+                "{toucher} touches {target}.", 
+                exclude=self,
+                mapping={"toucher": self, "target": target} )
+        try:
+            return "You reach out and touch the {}".format(target.get_display_name(self),)
+        except AttributeError:
+            return "You reach out and touch the {}".format(target.key,)
 
     def at_touched(self, looker=None):
         """ This is called whenever someone touches this object.
@@ -86,6 +93,7 @@ class Object(DefaultObject, ExtendedDefaultObject):
                        to this object
      has_player (bool, read-only)- will only return *connected* players
      contents (list of Objects, read-only) - returns all objects inside this
+                       object (including exits)
                        object (including exits)
      exits (list of Objects, read-only) - returns all exits from this
                        object, if any
@@ -154,7 +162,6 @@ class Object(DefaultObject, ExtendedDefaultObject):
      at_access(result, accessing_obj, access_type) - called with the result
                             of a lock access check on this object. Return value
                             does not affect check result.
-
      at_before_move(destination)             - called just before moving object
                         to the destination. If returns False, move is cancelled.
      announce_move_from(destination)         - called in old location, just
@@ -204,6 +211,7 @@ class DamageOrb(Object):
         """
         self.db.damage = 5
         self.locks.add("get:false()")
+        self.locks.add("touch:all()")
 
     def at_touched(self, looker):
         if looker.db.health:
@@ -219,6 +227,7 @@ class HealingOrb(Object):
         """
         self.db.healing = 5
         self.locks.add("get:false()")
+        self.locks.add("touch:all()")
 
     def at_touched(self, looker):
         if looker.db.health:
