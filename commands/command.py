@@ -208,3 +208,25 @@ class CmdTouch(default_cmds.MuxCommand):
                 self.msg(self.caller.at_touch(target))
 
         
+class CmdFocus(default_cmds.MuxCommand):
+    """ Supplies default behavior for 'focus'
+    """
+
+    key = "focus"
+    locks = "cmd:all()"
+
+    def func(self):
+        """ This actually does things
+        """
+        if not self.args:
+            self.caller.msg("Focus on what?")
+        else:
+            target = self.caller.search(self.args)
+            if not target:
+                self.caller.msg("Focus on what?")
+            else:
+                # 
+                # what is at_look ??  I need to make an at_touch
+                self.msg(self.caller.at_focus(target))
+
+        

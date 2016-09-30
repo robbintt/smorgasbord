@@ -51,6 +51,33 @@ class ExtendedDefaultObject(object):
         """
         pass
 
+    def at_focus(self, target):
+        """ Modelled after at_look, at_focus has its own lock: "focus"
+        """
+        # This does not project the focus to the room, needs extended
+        if not target.access(self, "focus"):
+            try:
+                return "You could not focus on the {}.".format(target.get_display_name(self),)
+            except AttributeError:
+                return "You could not focus on the {}.".format(target.key,)
+        
+        target.at_focused(focuser=self)
+        self.location.msg_contents(
+                "{focuser} concentrates on {target}.", 
+                exclude=self,
+                mapping={"focuser": self, "target": target} )
+        try:
+            return "You focus your magical senses on {}.".format(target.get_display_name(self),)
+        except AttributeError:
+            return "You focus your magical senses on {}.".format(target.key,)
+
+    def at_focused(self, focuser=None):
+        """ This is called whenever someone focuses this object.
+
+        Follows the same code pattern as at_desc, a function used by at_look
+        """
+        pass
+
 
 class Object(DefaultObject, ExtendedDefaultObject):
     """
@@ -235,3 +262,17 @@ class HealingOrb(Object):
             toucher.db.health += self.db.healing
 
 
+class MagicalWand(Object):
+    """ A magical wand
+    """
+    def at_object_creation(self):
+        """
+        """
+        self.locks.add("get:all()")
+        self.locks.add("touch:all()")
+        self.locks.add("focus:all()")
+
+    def at_focused(self, focuser):
+        """
+        """
+        pass
