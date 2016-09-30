@@ -11,6 +11,7 @@ inheritance.
 
 """
 from evennia import DefaultObject
+from evennia import utils
 
 class ExtendedDefaultObject(object):
     """ Mixin adds additional functionality across the board
@@ -260,6 +261,7 @@ class HealingOrb(Object):
         """
         """
         self.db.healing = 5
+        self.db.focus_delay = 0
         self.locks.add("get:false()")
         self.locks.add("touch:all()")
 
@@ -277,7 +279,10 @@ class MagicalWand(Object):
         """
         """
         self.db.charge = 0
-        self.db.charge_max = 5
+        self.db.charge_max = 3
+        self.db.focus_delay = 3
+        self.db.touch_delay = 0
+        self.db.touch_when_charged_delay = 5
         self.locks.add("get:all()")
         self.locks.add("touch:all()")
         self.locks.add("focus:all()")
@@ -285,10 +290,26 @@ class MagicalWand(Object):
     def at_touched(self, toucher):
         """
         """
+        def local_remove_busy_flag(retval=None):
+            """ Removes the busy flag from caller
+            """
+            del toucher.ndb.busy
+            try:
+                toucher.msg("The {} releases you from its grip.".format(self.get_display_name(toucher)))
+            except AttributeError:
+                toucher.msg("The {} releases you from its grip.".format(self.key))
+
+
         if self.db.charge >= self.db.charge_max:
             self.location.msg_contents(
                 "The {item} cracks and a flash of light floods the area.",
                 mapping={"toucher" : toucher, "item": self} )
+
+            if self.db.touch_when_charged_delay > 0:
+                toucher.ndb.busy = True
+                utils.delay(self.db.focus_delay, callback=local_remove_busy_flag, retval=None)
+
+
         elif self.db.charge > 0:
             self.location.msg_contents(
                 "The {item} weakly glows and then abruptly goes dark.",
@@ -311,7 +332,6 @@ class MagicalWand(Object):
             self.location.msg_contents(
                 "The {item} pulses briefly, indicating it is fully charged.", 
                 mapping={"item": self} )
-
 
 
 

@@ -7,9 +7,7 @@ Commands describe the input the player can do to the game.
 
 from evennia import Command as BaseCommand
 
-# Was originally commented out, used in command tutorial for inheriting commands
-# https://github.com/evennia/evennia/wiki/Adding%20Command%20Tutorial
-from evennia import default_cmds
+from evennia import default_cmds, utils
 
 
 class Command(BaseCommand):
@@ -186,6 +184,8 @@ class Command(BaseCommand):
 #                self.character = None
 #
 
+
+
 class CmdTouch(default_cmds.MuxCommand):
     """ Supplies default behavior for 'touch'
     """
@@ -196,16 +196,33 @@ class CmdTouch(default_cmds.MuxCommand):
     def func(self):
         """ This actually does things
         """
-        if not self.args:
-            self.caller.msg("Touch what?")
+        if self.caller.ndb.busy:
+            self.caller.msg("You are a little busy for that.")
         else:
-            target = self.caller.search(self.args)
-            if not target:
+            if not self.args:
                 self.caller.msg("Touch what?")
             else:
-                # 
-                # what is at_look ??  I need to make an at_touch
-                self.msg(self.caller.at_touch(target))
+                target = self.caller.search(self.args)
+                if not target:
+                    self.caller.msg("Touch what?")
+                else:
+                    self.msg(self.caller.at_touch(target))
+                    if target.db.touch_delay > 0:
+                        self.caller.ndb.busy = True
+                        utils.delay(target.db.touch_delay, callback=self.remove_busy_flag, retval=target)
+
+    def remove_busy_flag(self, retval):
+        """ Removes the busy flag from caller
+
+        This feature isn't used. The language would likely be object dependent
+        this feature likely needs utils.delay to accept kwargs so you can generate
+        a message in a way similar to the get_display_name api.
+        """
+        del self.caller.ndb.busy
+        try:
+            self.caller.msg("You finish touching the {}.".format(retval.get_display_name(self)))
+        except AttributeError:
+            self.caller.msg("You finish touching the {}.".format(retval.key))
 
         
 class CmdFocus(default_cmds.MuxCommand):
@@ -218,15 +235,27 @@ class CmdFocus(default_cmds.MuxCommand):
     def func(self):
         """ This actually does things
         """
-        if not self.args:
-            self.caller.msg("Focus on what?")
+        # turn this into a decorator for all tasks that need a busy check
+        if self.caller.ndb.busy:
+            self.caller.msg("You are a little busy for that.")
         else:
-            target = self.caller.search(self.args)
-            if not target:
+            if not self.args:
                 self.caller.msg("Focus on what?")
             else:
-                # 
-                # what is at_look ??  I need to make an at_touch
-                self.msg(self.caller.at_focus(target))
+                target = self.caller.search(self.args)
+                if not target:
+                    self.caller.msg("Focus on what?")
+                else:
+                    self.msg(self.caller.at_focus(target))
+                    if target.db.focus_delay > 0:
+                        self.caller.ndb.busy = True
+                        utils.delay(target.db.focus_delay, callback=self.remove_busy_flag, retval=target)
 
-        
+    def remove_busy_flag(self, retval):
+        """ Removes the busy flag from caller
+        """
+        del self.caller.ndb.busy
+        try:
+            self.caller.msg("You finish focusing on the {}.".format(retval.get_display_name(self)))
+        except AttributeError:
+            self.caller.msg("You finish focusing on the {}.".format(retval.key))
