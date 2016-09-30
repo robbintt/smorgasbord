@@ -25,6 +25,14 @@ A smorgasbord of features to be mixed into a future game world.
         2. Body parts can inherit from that class and become persistent_attributes
     
 
+2. Indefinite articles in 'touch' events.
+    1. Need to manage "a", "an", "the", or "some", or no article
+        - "a", "an" => words with leading consonants, an for words with leading vowels.
+        - "the" => unique items
+        - "some" => some water, something common place, some dirt.
+        - no article => characters
+
+
 
 ### Notes
 
