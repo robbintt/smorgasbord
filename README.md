@@ -55,6 +55,18 @@ A smorgasbord of features to be mixed into a future game world.
 8. Concept of temporary experience or 'being sharp' at something
     - Core skills may build but then you have a modifier for what you've done lately
 
+9. Spell Management
+    - For now lets just implement scrolls
+    - When you read a scroll a memory uncurls like a snake behind your throat.
+        - Or it could blossom like a rose
+    - The spell is then in the character's active spell slot and can be cast.
+        - As it sits in the active spell slot longer its chance of being cast increases
+        - After a certain amount of time you lose the spell
+            - Put a callback for like 180 seconds whenever you put a spell in your active slot
+            - After this timer the callback empties the slot and the timer 
+        - The player can manually forget to cancel the callback and empty the slot
+        - If the player prepares another spell or reads another scroll then the player should become muddled and lose both
+
 ### Notes
 
 - `rlwrap telnet localhost 4000` - for line history in telnet
@@ -65,8 +77,12 @@ A smorgasbord of features to be mixed into a future game world.
     - Same for all characters? Probably. Where is this from?
 - Persistent attributes: `prelogout_location`, `desc`, `health`, health_max`
     - Both health attributes are from my custom room, so it works.
-
-The server database is not under source control.  If you wish to keep a server instance, back it up carefully.
+- The __server database is not under source control__.  If you wish to keep a server instance, back it up carefully.
+- To Regenerate from git repository
+    1. `evennia --initsettings`
+    2. `mkdir server/logs`
+    3. `evennia migrate`
+    4. `evennia start`
 
 
 ### Resources
@@ -76,6 +92,7 @@ The server database is not under source control.  If you wish to keep a server i
 - [Game Directory Overview](https://github.com/evennia/evennia/wiki/Tutorial%20World%20Introduction)
 - [RP Mixins for Object, Room, Character](https://github.com/evennia/evennia/blob/master/evennia/contrib/rpsystem.py#L6)
     
+
 
 ### Default Readme Tips
 
