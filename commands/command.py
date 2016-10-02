@@ -209,6 +209,7 @@ class CmdTouch(default_cmds.MuxCommand):
                     if target.db.touch_delay > 0:
                         self.caller.ndb.busy = True
                         utils.delay(target.db.touch_delay, callback=self.remove_busy_flag, retval=target)
+                    # this needs to happen last so an object can delete it self when it is touched
                     self.msg(self.caller.at_touch(target))
 
     def remove_busy_flag(self, retval):
@@ -249,6 +250,7 @@ class CmdFocus(default_cmds.MuxCommand):
                     if target.db.focus_delay > 0:
                         self.caller.ndb.busy = True
                         utils.delay(target.db.focus_delay, callback=self.remove_busy_flag, retval=target)
+                    # this needs to happen last so an object can delete it self when it is focused
                     self.msg(self.caller.at_focus(target))
 
     def remove_busy_flag(self, retval):
@@ -285,6 +287,7 @@ class CmdRead(default_cmds.MuxCommand):
                     if target.db.read_delay > 0:
                         self.caller.ndb.busy = True
                         utils.delay(target.db.read_delay, callback=self.remove_busy_flag, retval=target)
+                    # this needs to happen last so an object can delete it self when it is the objectread
                     self.msg(self.caller.at_read(target))
 
     def remove_busy_flag(self, retval):
