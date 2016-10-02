@@ -96,6 +96,7 @@ A smorgasbord of features to be mixed into a future game world.
     2. `mkdir server/logs`
     3. `evennia migrate`
     4. `evennia start`
+- Reinitialize all objects - Potentially Destructive! - `for obj in evennia.ObjectDB.objects.all(): obj.at_object_creation()`
 
 
 ### Resources
