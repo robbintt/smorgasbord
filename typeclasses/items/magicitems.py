@@ -118,7 +118,8 @@ class MagicalWand(Object):
                 exclude=focuser,
                 mapping={"item": self} )
         else:
-            # how can this be prevented from running a timer
+            # this optionally could not run a timer, how do i implement that
+            # it may actually be tested elsewhere
             try:
                 focuser_message = "As you focus on the {}, it pulses briefly and seems to reject additional charge."
                 focuser.msg(focuser_message.format(self.get_display_name(focuser)))
