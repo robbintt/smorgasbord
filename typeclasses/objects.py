@@ -88,21 +88,24 @@ class ExtendedDefaultObject(object):
         """
         if not target.access(self, "read"):
             try:
-                return "You could not read the {}.".format(target.get_display_name(self),)
+                response = "You could not read the {}.".format(target.get_display_name(self),)
             except AttributeError:
-                return "You could not read the {}.".format(target.key,)
+                response = "You could not read the {}.".format(target.key,)
         
-        self.location.msg_contents(
-                "{reader} reads {target}.", 
-                exclude=self,
-                mapping={"reader": self, "target": target} )
+        else: 
+            self.location.msg_contents(
+                    "{reader} reads {target}.", 
+                    exclude=self,
+                    mapping={"reader": self, "target": target} )
 
-        target.at_objectread(reader=self)
+            try:
+                response = "You read {}.".format(target.get_display_name(self),)
+            except AttributeError:
+                response = "You read {}.".format(target.key,)
 
-        try:
-            return "You read {}.".format(target.get_display_name(self),)
-        except AttributeError:
-            return "You read {}.".format(target.key,)
+            target.at_objectread(reader=self)
+
+        return response
 
 
     def at_objectread(self, reader=None):
