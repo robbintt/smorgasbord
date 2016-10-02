@@ -67,6 +67,18 @@ A smorgasbord of features to be mixed into a future game world.
         - The player can manually forget to cancel the callback and empty the slot
         - If the player prepares another spell or reads another scroll then the player should become muddled and lose both
 
+10. Dealing with item articles: 'a', 'an', 'the', 'some', and '' (empty)
+    - The article would need referred to anywhere the item is explicitly broadcast to a room or individual.
+    - Supply the article in the initalizer: `article = an`
+    - If not supplied, provide a function for predicting:
+        - `if not article: article = article_predictor()`
+        - This function can exist in a base class somewhere
+    - Rules:
+        - Players get ''
+        - items with `unique = True` or a unique tag maybe??? get `the`
+        - otherwise 'a' and 'an' are based on the first letter.
+        - 'some' is a special case, some beer, some water. A very vague one. 'a water' just will not do.
+
 ### Notes
 
 - `rlwrap telnet localhost 4000` - for line history in telnet
