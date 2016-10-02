@@ -259,3 +259,39 @@ class CmdFocus(default_cmds.MuxCommand):
             self.caller.msg("You finish focusing on the {}.".format(retval.get_display_name(self)))
         except AttributeError:
             self.caller.msg("You finish focusing on the {}.".format(retval.key))
+
+
+class CmdRead(default_cmds.MuxCommand):
+    """ Supplies default behavior for 'read'
+    """
+
+    key = "read"
+    locks = "cmd:all()"
+
+    def func(self):
+        """ This actually does things
+        """
+        # turn this into a decorator for all tasks that need a busy check
+        if self.caller.ndb.busy:
+            self.caller.msg("You are a little busy for that.")
+        else:
+            if not self.args:
+                self.caller.msg("Read what?")
+            else:
+                target = self.caller.search(self.args)
+                if not target:
+                    self.caller.msg("Read what?")
+                else:
+                    self.msg(self.caller.at_read(target))
+                    if target.db.read_delay > 0:
+                        self.caller.ndb.busy = True
+                        utils.delay(target.db.read_delay, callback=self.remove_busy_flag, retval=target)
+
+    def remove_busy_flag(self, retval):
+        """ Removes the busy flag from caller
+        """
+        del self.caller.ndb.busy
+        try:
+            self.caller.msg("You finish reading the {}.".format(retval.get_display_name(self)))
+        except AttributeError:
+            self.caller.msg("You finish reading the {}.".format(retval.key))

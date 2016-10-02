@@ -130,4 +130,28 @@ class MagicalWand(Object):
                 mapping={"item": self} )
 
 
+class SpellScroll(Object):
+    """ Template for scrolls
+    """
+    def at_object_creation(self):
+        """
+        """
+        self.locks.add("get:all()")
+        self.locks.add("touch:all()")
+        self.locks.add("focus:all()")
+        self.locks.add("read:all()")
+
+    def at_objectread(self, reader):
+        """ Effects of reading the scroll
+
+        By default the scroll will: 
+            1. pass the spell to the player's active spell slot
+            2. self destruct
+        """
+        self.delete()
+
+
+class HealingSpellScroll(SpellScroll):
+    """ Demo scroll for casting HealingSpell, a spell to improve player health
+    """
 

@@ -28,7 +28,6 @@ class ExtendedDefaultObject(object):
     def at_touch(self, target):
         """ Modelled after at_look, at_touch has its own lock: "touch"
         """
-        # This does not project the touch to the room, needs extended
         if not target.access(self, "touch"):
             try:
                 return "You could not touch the {}.".format(target.get_display_name(self),)
@@ -54,10 +53,10 @@ class ExtendedDefaultObject(object):
         """
         pass
 
+
     def at_focus(self, target):
         """ Modelled after at_look, at_focus has its own lock: "focus"
         """
-        # This does not project the focus to the room, needs extended
         if not target.access(self, "focus"):
             try:
                 return "You could not focus on the {}.".format(target.get_display_name(self),)
@@ -78,6 +77,36 @@ class ExtendedDefaultObject(object):
 
     def at_focused(self, focuser=None):
         """ This is called whenever someone focuses this object.
+
+        Follows the same code pattern as at_desc, a function used by at_look
+        """
+        pass
+
+
+    def at_read(self, target):
+        """ Modelled after at_look, at_read has its own lock: "read"
+        """
+        if not target.access(self, "read"):
+            try:
+                return "You could not read the {}.".format(target.get_display_name(self),)
+            except AttributeError:
+                return "You could not read the {}.".format(target.key,)
+        
+        self.location.msg_contents(
+                "{reader} reads {target}.", 
+                exclude=self,
+                mapping={"reader": self, "target": target} )
+
+        target.at_objectread(reader=self)
+
+        try:
+            return "You read {}.".format(target.get_display_name(self),)
+        except AttributeError:
+            return "You read {}.".format(target.key,)
+
+
+    def at_objectread(self, reader=None):
+        """ This is called whenever someone reads this object.
 
         Follows the same code pattern as at_desc, a function used by at_look
         """
