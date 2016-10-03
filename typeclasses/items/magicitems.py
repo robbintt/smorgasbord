@@ -10,6 +10,7 @@ class DamageOrb(Object):
     def at_object_creation(self):
         """
         """
+        super(DamageOrb, self).at_object_creation()
         self.db.damage = 5
         self.locks.add("get:false()")
         self.locks.add("touch:all()")
@@ -28,6 +29,7 @@ class HealingOrb(Object):
     """ An orb that removes damage when it is touched.
     """
     def at_object_creation(self):
+        super(HealingOrb, self).at_object_creation()
         """
         """
         self.db.healing = 5
@@ -48,6 +50,7 @@ class MagicalWand(Object):
     def at_object_creation(self):
         """
         """
+        super(MagicalWand, self).at_object_creation()
         self.db.charge = 0
         self.db.charge_max = 3
         self.db.focus_delay = 3
@@ -137,6 +140,7 @@ class SpellScroll(Object):
     def at_object_creation(self):
         """
         """
+        super(SpellScroll, self).at_object_creation()
         self.locks.add("get:all()")
         self.locks.add("touch:all()")
         self.locks.add("focus:all()")
