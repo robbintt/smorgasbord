@@ -5,6 +5,16 @@ A smorgasbord of features to be mixed into a future game world.
 
 ### Goals
 
+0. Containers: get_in and put_in
+    1. Override search language (maybe a silent or quiet flag on search with a custom caller.msg
+    2. Add put_in feature to put things in containers.
+    3. Add listener methods like at_touched and at_desc that allow the container to give a custom response.
+    3. Consider tests on the container being get_in'd
+    4. Add tests -- currently anything can be gotten from anything (or put_in once the pattern is established.
+        - weight
+        - volume
+        - locks / permissions
+
 1. Player Body
     1. Player should have body parts
         1. For each body part zone there is an internal and external object
