@@ -205,7 +205,7 @@ class CmdGet(COMMAND_DEFAULT_CLASS):
     your inventory.
     """
     key = "get"
-    aliases = "grab;take"
+    aliases = "take" # how do i do two aliases?
     locks = "cmd:all()"
     arg_regex = r"\s|$"
 

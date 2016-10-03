@@ -95,6 +95,8 @@ A smorgasbord of features to be mixed into a future game world.
         - otherwise 'a' and 'an' are based on the first letter.
         - 'some' is a special case, some beer, some water. A very vague one. 'a water' just will not do.
 
+11. Add more than one `aliases` to a command. See `get` which has `aliases="take"` for an example
+
 ### Notes
 
 - `rlwrap telnet localhost 4000` - for line history in telnet
