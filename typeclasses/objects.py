@@ -263,6 +263,6 @@ class Object(DefaultObject, ExtendedDefaultObject):
                                  object speaks
 
      """
-    pass
-
+    def at_object_creation(self):
+        self.weight = 1
 

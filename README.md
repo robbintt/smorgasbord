@@ -97,7 +97,7 @@ A smorgasbord of features to be mixed into a future game world.
     2. `mkdir server/logs`
     3. `evennia migrate`
     4. `evennia start`
-- Reinitialize all objects - Potentially Destructive! - `for obj in evennia.ObjectDB.objects.all(): obj.at_object_creation()`
+- Reinitialize all objects - Potentially Destructive! - `@py for obj in evennia.ObjectDB.objects.all(): obj.at_object_creation()`
 - Reinitialize a certain class of objects - Potentially Destructive! - `@py from typeclasses.objects import Heavy; [obj.at_object_creation() for obj in Heavy.objects.all()]`
 
 
