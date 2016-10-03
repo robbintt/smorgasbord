@@ -83,6 +83,7 @@ A smorgasbord of features to be mixed into a future game world.
 
 - `rlwrap telnet localhost 4000` - for line history in telnet
 - Make a detached room: `@create My Room Name:rooms.DefaultRoom` `@tel/tonone My Room Name`
+- (Griatch) The easiest way to do a global search for an object is to do `evennia.search_object("name")`
 - If evennia says it has hanging `pid` then go in the /server/ folder and remove the offending files.
 - [Ainneve](https://github.com/evennia/ainneve) - A full sample game
 - Admin can reload the server with `@reload`
@@ -97,6 +98,7 @@ A smorgasbord of features to be mixed into a future game world.
     3. `evennia migrate`
     4. `evennia start`
 - Reinitialize all objects - Potentially Destructive! - `for obj in evennia.ObjectDB.objects.all(): obj.at_object_creation()`
+- Reinitialize a certain class of objects - Potentially Destructive! - `@py from typeclasses.objects import Heavy; [obj.at_object_creation() for obj in Heavy.objects.all()]`
 
 
 ### Resources
