@@ -17,6 +17,9 @@ A smorgasbord of features to be mixed into a future game world.
         - volume
         - locks / permissions
     6. Add look_in to view stuff inside stuff.
+    7. 'get sword in my sheath' should be equivalent to 'get sword in my sheath'.
+        - Consider implementing 'get my sword' which searches all your top level objects for the first sword.
+    8. Add inventory limits at some point. Move this task when necessary.
 
 1. Player Body
     1. Player should have body parts
