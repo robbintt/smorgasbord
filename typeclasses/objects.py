@@ -116,6 +116,12 @@ class ExtendedDefaultObject(object):
         pass
 
 
+    def at_put(self, putter):
+        """ called after an object has been put in a container. Does not stop put.
+        """
+        pass
+
+
 class Object(DefaultObject, ExtendedDefaultObject):
     """
     This is the root typeclass object, implementing an in-game Evennia
@@ -265,4 +271,7 @@ class Object(DefaultObject, ExtendedDefaultObject):
      """
     def at_object_creation(self):
         self.db.weight = 1
+
+
+
 

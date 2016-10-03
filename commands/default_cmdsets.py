@@ -15,7 +15,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 """
 from evennia import default_cmds
 
-from commands.command import CmdTouch, CmdFocus, CmdRead, CmdGet
+from commands.command import CmdTouch, CmdFocus, CmdRead, CmdGet, CmdPut
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
     """
@@ -37,6 +37,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdFocus())
         self.add(CmdRead())
         self.add(CmdGet())
+        self.add(CmdPut())
 
 
 class PlayerCmdSet(default_cmds.PlayerCmdSet):

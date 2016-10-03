@@ -205,7 +205,7 @@ class CmdGet(COMMAND_DEFAULT_CLASS):
     your inventory.
     """
     key = "get"
-    aliases = "grab"
+    aliases = "grab;take"
     locks = "cmd:all()"
     arg_regex = r"\s|$"
 
@@ -261,6 +261,79 @@ class CmdGet(COMMAND_DEFAULT_CLASS):
         # calling hook method
         obj.at_get(caller)
 
+
+class CmdPut(COMMAND_DEFAULT_CLASS):
+    """ put X in Y command.
+
+    This command should be expanded to support on, under, etc. - however, objets must have these things...
+    
+    Modified from custom CmdGet (in this file)
+    """
+    key = "put"
+    locks = "cmd:all()"
+    arg_regex = r"\s|$"
+
+    def func(self):
+        "implements the command."
+
+        caller = self.caller
+
+        if not self.args:
+            caller.msg("Put what?")
+            return
+
+        in_count = len([x for x in self.args.split() if x == "in"])
+        if in_count > 1:
+            caller.msg("Too many 'in' terms, please use 'in' once to retrieve from a container.")
+            return
+
+        if in_count < 1:
+            caller.msg("Put {} in what?".format(self.args))
+            return
+
+        elif in_count == 1:
+            item, _, container = self.args.partition(" in ")
+            # default to caller as location (in "hands") or however it works.
+            # this is bad as it always defaults to caller first, so if caller has 3
+            # backpacks and there are 3 on the ground, then you cannot access the 3 
+            # on the ground.  other MUDs use 'my' to signify one in my inventory.
+            # now i see why.
+            destination = caller.search(container, location=caller, nofound_string=" ")
+            if not destination:
+                destination = caller.search(container, location=caller.location, nofound_string="Put it where?")
+            if not destination:
+                return
+            caller_message = "You put {object} in {location}."
+            location_message = "{caller} puts {object} in {location}."
+
+        location = caller.location
+
+        # consider making this search silent and using the commented message if it is not found
+        obj = caller.search(item, location=caller, nofound_string=" ")
+        if not obj:
+            obj = caller.search(item, location=location, nofound_string="Put what?")
+            if not obj:
+                return
+        if caller is obj:
+            caller.msg("You can't think of a way to do that.")
+            return
+        if destination is obj:
+            caller.msg("You cannot put something inside itself.")
+            return
+        if not obj.access(caller, 'put'):
+            if obj.db.get_err_msg:
+                caller.msg(obj.db.get_err_msg)
+            else:
+                caller.msg("You can't get that.")
+            return
+
+        message_data = { "object" : obj.name, "location" : destination, "caller" : caller }
+        obj.move_to(destination, quiet=True)
+        caller.msg(caller_message.format(**message_data))
+        caller.location.msg_contents(location_message.format(**message_data),
+                                     exclude=caller)
+        # calling hook method
+        obj.at_put(caller)
 
 class CmdTouch(default_cmds.MuxCommand):
     """ Supplies default behavior for 'touch'

@@ -18,7 +18,9 @@ class Room(DefaultRoom, ExtendedDefaultObject):
     See examples/object.py for a list of
     properties and methods available on all Objects.
     """
-    pass
+    def basetype_setup(self):
+        super(Room, self).basetype_setup()
+        self.locks.add("put:false()")
 
 
 class CharacterGeneratorRoom(Room):

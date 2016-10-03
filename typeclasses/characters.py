@@ -40,6 +40,10 @@ class Character(DefaultCharacter, ExtendedDefaultObject):
     Updating integral stats will change the way all characters behave.
     This means they update whenever the model is reloaded.
     """
+    def basetype_setup(self):
+        super(Character, self).basetype_setup()
+        self.locks.add("put:false()")
+        
     def at_object_creation(self):
         """ Object creation happens before character generation so it shouldn't be run again
 

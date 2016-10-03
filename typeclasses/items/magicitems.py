@@ -13,6 +13,7 @@ class DamageOrb(Object):
         super(DamageOrb, self).at_object_creation()
         self.db.damage = 5
         self.locks.add("get:false()")
+        self.locks.add("put:false()")
         self.locks.add("touch:all()")
 
     def at_touched(self, toucher):
@@ -35,6 +36,7 @@ class HealingOrb(Object):
         self.db.healing = 5
         self.db.focus_delay = 0
         self.locks.add("get:false()")
+        self.locks.add("put:false()")
         self.locks.add("touch:all()")
 
     def at_touched(self, toucher):
@@ -59,6 +61,7 @@ class MagicalWand(Object):
         self.locks.add("get:all()")
         self.locks.add("touch:all()")
         self.locks.add("focus:all()")
+        self.locks.add("put:all()")
 
     def at_touched(self, toucher):
         """
@@ -145,6 +148,7 @@ class SpellScroll(Object):
         self.locks.add("touch:all()")
         self.locks.add("focus:all()")
         self.locks.add("read:all()")
+        self.locks.add("put:all()")
 
     def at_objectread(self, reader):
         """ Effects of reading the scroll
