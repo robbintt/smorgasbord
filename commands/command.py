@@ -9,6 +9,9 @@ from evennia import Command as BaseCommand
 
 from evennia import default_cmds, utils
 
+# used by CmdGet which is plucked and modded from evennia.commands.default.general
+from evennia import settings
+COMMAND_DEFAULT_CLASS = utils.class_from_module(settings.COMMAND_DEFAULT_CLASS)
 
 class Command(BaseCommand):
     """
@@ -184,6 +187,79 @@ class Command(BaseCommand):
 #                self.character = None
 #
 
+class CmdGet(COMMAND_DEFAULT_CLASS):
+    """ Modified from standard CmdGet
+    
+    Modified version checks to see if self.args has " in ". If it does, then
+    the location, arg2, is set as the location and the command proceeds.
+
+
+    Standard CmdGet DocString:
+    =================
+    pick up something
+
+    Usage:
+      get <obj>
+
+    Picks up an object from your location and puts it in
+    your inventory.
+    """
+    key = "get"
+    aliases = "grab"
+    locks = "cmd:all()"
+    arg_regex = r"\s|$"
+
+    def func(self):
+        "implements the command."
+
+        caller = self.caller
+
+        if not self.args:
+            caller.msg("Get what?")
+            return
+
+        in_count = len([x for x in self.args.split() if x == "in"])
+        if in_count > 1:
+            caller.msg("Too many 'in' terms, please use 'in' once to retrieve from a container.")
+            return
+
+        elif in_count == 1:
+            item, _, container = self.args.partition(" in ")
+            location = caller.search(container, location=caller.location)
+            if not location:
+                caller.msg("Could not find {}".format(container))
+                return
+            caller_message = "You get {object} from {location}."
+            location_message = "{caller} gets {object} from {location}."
+        else:
+            item = self.args
+            location = caller.location
+            caller_message = "You pick up {object}."
+            location_message = "{caller} picks up {object}"
+
+
+        # consider making this search silent and using the commented message if it is not found
+        obj = caller.search(item, location=location)
+        if not obj:
+            # caller.msg("Get what?")
+            return
+        if caller == obj:
+            caller.msg("You can't get yourself.")
+            return
+        if not obj.access(caller, 'get'):
+            if obj.db.get_err_msg:
+                caller.msg(obj.db.get_err_msg)
+            else:
+                caller.msg("You can't get that.")
+            return
+
+        message_data = { "object" : obj.name, "location" : location, "caller" : caller }
+        obj.move_to(caller, quiet=True)
+        caller.msg(caller_message.format(**message_data))
+        caller.location.msg_contents(location_message.format(**message_data),
+                                     exclude=caller)
+        # calling hook method
+        obj.at_get(caller)
 
 
 class CmdTouch(default_cmds.MuxCommand):
