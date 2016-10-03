@@ -75,7 +75,7 @@ class Character(DefaultCharacter, ExtendedDefaultObject):
             """
             self.db.essential_to_live = False
             self.db.max_health = 10000
-            self.db.health = max_health
+            self.db.health = self.db.max_health
             self.db.scarring = 0
 
             def health_changed(self, amount):
