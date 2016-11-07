@@ -17,13 +17,14 @@ class ExtendedDefaultObject(object):
     """ Mixin adds additional functionality across the board
 
     This object is mixed into: Room, Character, Object
+    It should be listed first, overriding the default inheritance
     Should it go other places?
-
-    This object doesn't NEED to inherit from DefaultObject as it is
-    a mixin into descendants of DefaultObject.  
-    
-    The inheritance can probably just be removed with no effect.
     """
+    def at_object_creation(self):
+        """ This overloads the DefaultObject at_object_creation, which is empty.
+        """
+        self.db.weight = 1
+        self.prepositions = list()
 
     def remove_busy_flag(self, retval):
         """ Removes the busy flag from the caller object
@@ -172,7 +173,7 @@ class ExtendedDefaultObject(object):
         pass
 
 
-class Object(DefaultObject, ExtendedDefaultObject):
+class Object(ExtendedDefaultObject, DefaultObject):
     """
     This is the root typeclass object, implementing an in-game Evennia
     game object, such as having a location, being able to be
@@ -320,7 +321,8 @@ class Object(DefaultObject, ExtendedDefaultObject):
 
      """
     def at_object_creation(self):
-        self.db.weight = 1
-        self.prepositions = list()
+        """
+        """
+        super(Object, self).at_object_creation()
 
 

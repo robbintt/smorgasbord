@@ -10,7 +10,7 @@ creation commands.
 from evennia import DefaultCharacter
 from objects import ExtendedDefaultObject, Object
 
-class Character(DefaultCharacter, ExtendedDefaultObject):
+class Character(ExtendedDefaultObject, DefaultCharacter):
     """
     The Character defaults to reimplementing some of base Object's hook methods with the
     following functionality:
