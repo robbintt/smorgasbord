@@ -117,6 +117,10 @@ class Character(DefaultCharacter, ExtendedDefaultObject):
 
             Object has a sublocation tag property: 'on', 'in', 'under', 'behind'
 
+            These sublocations are PREPOSITIONS!
+
+            Views and gets should be managed using these prepositions.
+
             Receiving location must have the attempted sublocation tag available
 
             The object's tag can be set by the receiving object when it's
@@ -124,8 +128,12 @@ class Character(DefaultCharacter, ExtendedDefaultObject):
             whenever its location changes.  The object reaction has to act first
             so the new tag is kept.
 
+
             Currently lock is just on the verb get, so it would not need
             to know anything about sublocation tagging to work.
+
+            There should be some sort of advanced locking though. You can get a 
+            photo on a safe but you cannot get a bag of gold in a safe.
 
             Views and gets can be filtered by sublocation tag. Sublocation tags
             could also be managed by locks. This is a bit more complex.
