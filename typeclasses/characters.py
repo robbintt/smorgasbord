@@ -152,6 +152,23 @@ class Character(DefaultCharacter, ExtendedDefaultObject):
                 location tag and wherever it ends up might set a new one
 
 
+            Using Tags with the built in search() method?
+            =============================================
+
+            search: https://github.com/evennia/evennia/blob/master/evennia/objects/objects.py#L270
+            All objects can search in their location.
+            Does this default search support some sort of tagging?
+
+            01:28 < robbintt> i might be able to complete what i want by 
+                chaining attribute_name searches
+            01:29 < robbintt> say there is a vase on a table and i use the 
+                command 'get vase on table'
+            01:29 < robbintt> first it queries the table for a vase, then it 
+                queries the resulting vases for one with the sublocation "on"
+
+            How would chaining those queries go?
+
+
             Body Part Properties:
             =====================
 
