@@ -35,6 +35,7 @@ class HealingOrb(Object):
         """
         self.db.healing = 5
         self.db.focus_delay = 0
+        self.db.touch_delay = 2
         self.locks.add("get:false()")
         self.locks.add("put:false()")
         self.locks.add("touch:all()")

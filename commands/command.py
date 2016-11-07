@@ -335,115 +335,90 @@ class CmdPut(COMMAND_DEFAULT_CLASS):
         # calling hook method
         obj.at_put(caller)
 
-class CmdTouch(default_cmds.MuxCommand):
-    """ Supplies default behavior for 'touch'
-    """
-
-    key = "touch"
-    locks = "cmd:all()"
-
-    def func(self):
-        """ This actually does things
-        """
-        if self.caller.ndb.busy:
-            self.caller.msg("You are a little busy for that.")
-        else:
-            if not self.args:
-                self.caller.msg("Touch what?")
-            else:
-                target = self.caller.search(self.args)
-                if not target:
-                    self.caller.msg("Touch what?")
-                else:
-                    if target.db.touch_delay > 0:
-                        self.caller.ndb.busy = True
-                        utils.delay(target.db.touch_delay, callback=self.remove_busy_flag, retval=target)
-                    # this needs to happen last so an object can delete it self when it is touched
-                    self.msg(self.caller.at_touch(target))
-
-    def remove_busy_flag(self, retval):
-        """ Removes the busy flag from caller
-
-        This feature isn't used. The language would likely be object dependent
-        this feature likely needs utils.delay to accept kwargs so you can generate
-        a message in a way similar to the get_display_name api.
-        """
-        del self.caller.ndb.busy
-        try:
-            self.caller.msg("You finish touching the {}.".format(retval.get_display_name(self)))
-        except AttributeError:
-            self.caller.msg("You finish touching the {}.".format(retval.key))
 
         
-class CmdFocus(default_cmds.MuxCommand):
-    """ Supplies default behavior for 'focus'
-    """
-
-    key = "focus"
-    locks = "cmd:all()"
-
-    def func(self):
-        """ This actually does things
-        """
-        # turn this into a decorator for all tasks that need a busy check
-        if self.caller.ndb.busy:
-            self.caller.msg("You are a little busy for that.")
-        else:
-            if not self.args:
-                self.caller.msg("Focus on what?")
-            else:
-                target = self.caller.search(self.args)
-                if not target:
-                    self.caller.msg("Focus on what?")
-                else:
-                    if target.db.focus_delay > 0:
-                        self.caller.ndb.busy = True
-                        utils.delay(target.db.focus_delay, callback=self.remove_busy_flag, retval=target)
-                    # this needs to happen last so an object can delete it self when it is focused
-                    self.msg(self.caller.at_focus(target))
-
-    def remove_busy_flag(self, retval):
-        """ Removes the busy flag from caller
-        """
-        del self.caller.ndb.busy
-        try:
-            self.caller.msg("You finish focusing on the {}.".format(retval.get_display_name(self)))
-        except AttributeError:
-            self.caller.msg("You finish focusing on the {}.".format(retval.key))
 
 
-class CmdRead(default_cmds.MuxCommand):
-    """ Supplies default behavior for 'read'
-    """
 
+
+class CmdObjectInteraction(default_cmds.MuxCommand):
+    """ middleware Class for any command in which 2 objects interact
+
+    A number of commands follow the same model.
+        1. parse command
+        2. pass error messages to the caller
+        3. The player is given a delay
+        4. The target object's receiving `at_` function is triggered
+
+    This is middleware for verbs that govern interaction between two objects.
+
+    # The following variables are consumed by `func` for the particular action
+    # example: 'read' verb
     key = "read"
     locks = "cmd:all()"
+    caller_busy_error = "You are a little busy for that."
+    caller_done_msg = "You finish reading the {}."
+    object_notexist_error = "Read what?"
+    # no object given defaults to the same error as if the object is not found
+    no_object_given_error = object_notexist_error
+    # at_caller will trigger the at_called method for the specific verb
+    at_caller = 'at_read'
+
+    """
 
     def func(self):
-        """ This actually does things
+        """ The method that handles any parsing and triggers the interaction
+
+        getattr is used to get the response of the caller's at_ function. The
+        function name is contained in the at_caller string.
         """
-        # turn this into a decorator for all tasks that need a busy check
         if self.caller.ndb.busy:
-            self.caller.msg("You are a little busy for that.")
+            self.caller.msg(self.caller_busy_error)
         else:
             if not self.args:
-                self.caller.msg("Read what?")
+                self.caller.msg(self.no_object_given_error)
             else:
                 target = self.caller.search(self.args)
                 if not target:
-                    self.caller.msg("Read what?")
+                    self.caller.msg(self.object_notexist_error)
                 else:
-                    if target.db.read_delay > 0:
-                        self.caller.ndb.busy = True
-                        utils.delay(target.db.read_delay, callback=self.remove_busy_flag, retval=target)
-                    # this needs to happen last so an object can delete it self when it is the objectread
-                    self.msg(self.caller.at_read(target))
+                    # this needs to happen last so each object can delete itself
+                    at_caller_function = getattr(self.caller, self.at_caller)
+                    self.msg(at_caller_function(target))
 
-    def remove_busy_flag(self, retval):
-        """ Removes the busy flag from caller
-        """
-        del self.caller.ndb.busy
-        try:
-            self.caller.msg("You finish reading the {}.".format(retval.get_display_name(self)))
-        except AttributeError:
-            self.caller.msg("You finish reading the {}.".format(retval.key))
+
+class CmdRead(CmdObjectInteraction):
+    """ Use middleware to provide CmdRead.
+    """
+    key = "read"
+    locks = "cmd:all()"
+    caller_busy_error = "You are a little busy for that."
+    object_notexist_error = "Read what?"
+    # no object given defaults to the same error as if the object is not found
+    no_object_given_error = object_notexist_error
+    # at_caller will trigger the at_called method for the specific verb
+    at_caller = 'at_read'
+
+class CmdFocus(CmdObjectInteraction):
+    """ Use middleware to provide CmdRead.
+    """
+    key = "focus"
+    locks = "cmd:all()"
+    caller_busy_error = "You are a little busy for that."
+    object_notexist_error = "Focus on what?"
+    # no object given defaults to the same error as if the object is not found
+    no_object_given_error = object_notexist_error
+    # at_caller will trigger the at_called method for the specific verb
+    at_caller = 'at_focus'
+
+class CmdTouch(CmdObjectInteraction):
+    """ Use middleware to provide CmdRead.
+    """
+    key = "touch"
+    locks = "cmd:all()"
+    caller_busy_error = "You are a little busy for that."
+    object_notexist_error = "Touch what?"
+    # no object given defaults to the same error as if the object is not found
+    no_object_given_error = object_notexist_error
+    # at_caller will trigger the at_called method for the specific verb
+    at_caller = 'at_touch'

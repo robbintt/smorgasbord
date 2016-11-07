@@ -24,10 +24,36 @@ class ExtendedDefaultObject(object):
     
     The inheritance can probably just be removed with no effect.
     """
+
+    def remove_busy_flag(self, retval):
+        """ Removes the busy flag from the caller object
+
+        The busy flag blocks many verbs.
+
+        The caller needs some way to look at their busy flag. That isn't covered
+        in this function, but it could be covered in the error in the future.
+
+        This callback method can be used in at_touch or at_touched
+        or any similar method.
+        """
+        caller_done_msg = retval[0]
+        target = retval[1]
+
+        del self.ndb.busy
+
+        try:
+            self.msg(caller_done_msg.format(target.get_display_name(self)))
+        except AttributeError:
+            self.msg(caller_done_msg.format(target.key))
+            
     
     def at_touch(self, target):
         """ Modelled after at_look, at_touch has its own lock: "touch"
+
+        Ideally the multiple return control flow code pattern will be changed.
+        it is from the default at_look.
         """
+
         if not target.access(self, "touch"):
             try:
                 return "You could not touch the {}.".format(target.get_display_name(self),)
@@ -38,6 +64,14 @@ class ExtendedDefaultObject(object):
                 "{toucher} touches {target}.", 
                 exclude=self,
                 mapping={"toucher": self, "target": target} )
+
+        # A different touch delay can be defined and used in at_touched
+        touch_done_message = "You finish touching the {}."
+        if target.db.touch_delay > 0:
+            self.ndb.busy = True
+            utils.delay(target.db.touch_delay, 
+                        callback=self.remove_busy_flag, 
+                        retval=[touch_done_message, target])
 
         target.at_touched(toucher=self)
 
@@ -67,6 +101,14 @@ class ExtendedDefaultObject(object):
                 "{focuser} concentrates on {target}.", 
                 exclude=self,
                 mapping={"focuser": self, "target": target} )
+
+        # A different focus delay can be defined and used in at_focused
+        focus_done_message = "You finish focusing on the {}."
+        if target.db.focus_delay > 0:
+            self.ndb.busy = True
+            utils.delay(target.db.focus_delay, 
+                        callback=self.remove_busy_flag, 
+                        retval=[touch_done_message, target])
 
         target.at_focused(focuser=self)
 
@@ -102,6 +144,14 @@ class ExtendedDefaultObject(object):
                 response = "You read {}.".format(target.get_display_name(self),)
             except AttributeError:
                 response = "You read {}.".format(target.key,)
+
+        # A different read delay can be defined and used in at_readed
+        read_done_message = "You finish reading the {}."
+        if target.db.read_delay > 0:
+            self.ndb.busy = True
+            utils.delay(target.db.read_delay, 
+                        callback=self.remove_busy_flag, 
+                        retval=[touch_done_message, target])
 
             target.at_objectread(reader=self)
 
