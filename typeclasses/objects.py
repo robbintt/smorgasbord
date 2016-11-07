@@ -321,7 +321,6 @@ class Object(DefaultObject, ExtendedDefaultObject):
      """
     def at_object_creation(self):
         self.db.weight = 1
-
-
+        self.prepositions = list()
 
 
