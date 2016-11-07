@@ -400,7 +400,7 @@ class CmdRead(CmdObjectInteraction):
     at_caller = 'at_read'
 
 class CmdFocus(CmdObjectInteraction):
-    """ Use middleware to provide CmdRead.
+    """ Use middleware to provide CmdFocus.
     """
     key = "focus"
     locks = "cmd:all()"
@@ -412,7 +412,7 @@ class CmdFocus(CmdObjectInteraction):
     at_caller = 'at_focus'
 
 class CmdTouch(CmdObjectInteraction):
-    """ Use middleware to provide CmdRead.
+    """ Use middleware to provide CmdTouch.
     """
     key = "touch"
     locks = "cmd:all()"
