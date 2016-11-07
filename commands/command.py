@@ -268,6 +268,44 @@ class CmdPut(COMMAND_DEFAULT_CLASS):
     This command should be expanded to support on, under, etc. - however, objets must have these things...
     
     Modified from custom CmdGet (in this file)
+
+    FUTURE:
+    'put' - put an object into another object
+    The 'put' verb allows you to convey an object to a new location, generally
+    inside a container.
+    Mechanism: One object (generally character) conveys a second object into a
+    third object. The third object must be able to contain other objects.
+    Object1 - generally character
+    Object2 - object being moved
+    Object3 - container object
+    
+    HOW:
+    1. Object1 (inside Location1) uses the 'put' verb on Object2 and Object3
+    2. Object2 is searched for in: Object1, Location1
+        - A custom search can be done later using search() method features
+    3. (Object2 must be touched by Object1, so it must do a 'get' interaction)
+        - Object2 would then be inside Object1...
+        - IMPORTANT: So should this interaction be managed and completed???
+    4. Object1 notifies Object2 and Object3:
+        1. Object1 tells Object2 it wishes to put Object2 inside Object3.
+            - The verb 'put' called from Object1 gives Object3 to Object2
+            - 
+        2. Object1 tells Object3 it wishes to put Object2 inside Object3.
+        3. Either method may reject the interaction and give Object1 an error.
+        4. At this point, Object2 may either be in Object1 or 
+            at its original location? How are errors resolved?
+    5. Object3 accepts Object2. Follow the Object2.move_to(Object3) pattern.
+        - The Object2.at_moved() method interacts with Object1 and then Object3
+        - This should happen in the Object3.at_received() method.
+    6. Any tests are performed in at_moved() and at_receive()
+
+    NOTE:
+    In a sense this is already happening with search but location does not get
+    a say in if the get and put command succeeds.
+    BENEFIT:
+    Locations can easily have item or weight limits or interact with with the
+    player by acting differently when items are dropped or taken if this
+    paradigm is generalized.
     """
     key = "put"
     locks = "cmd:all()"
@@ -336,11 +374,6 @@ class CmdPut(COMMAND_DEFAULT_CLASS):
         obj.at_put(caller)
 
 
-        
-
-
-
-
 class CmdObjectInteraction(default_cmds.MuxCommand):
     """ middleware Class for any command in which 2 objects interact
 
@@ -363,7 +396,18 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
     no_object_given_error = object_notexist_error
     # at_caller will trigger the at_called method for the specific verb
     at_caller = 'at_read'
-
+    
+    FUTURE: 
+    generalizing this for prepositions clears the way for both location
+    specific searches and for three-way interactions like 'put' and 'get'.
+    Can they fit in the same method?
+    Under the 'read, focus, touch' paradigm, the object following the
+    preposition defines the search() space.  Under the 'get, put' paradigm,
+    the preposition defines the search space as well.  In fact, any of these
+    verbs without a preposition defines the search space, too.  The question
+    is whether we want the 'location' to have an opportunity to interact
+    with the object activating the verb before the verb is completed.
+    This is good news, I think.
     """
 
     def func(self):
@@ -372,19 +416,82 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
         getattr is used to get the response of the caller's at_ function. The
         function name is contained in the at_caller string.
         """
+        # this does not belong here, it needs registered globally and imported.
+        COMMAND_PREPOSITIONS = ["in", "under", "behind", "on"]
+        
+        # put other sane defaults here so they don't need redefined
+        error_too_many_prepositions = "Please use only one preposition from: {}".format(COMMAND_PREPOSITIONS)
+        command_requires_preposition = False
+        error_requires_preposition = "This command requires a location."
+        error_location_notexist = "Can't find the location of the object."
+        error_locationpreposition_notexist = "You can't seem to get there on that."
+        
         if self.caller.ndb.busy:
             self.caller.msg(self.caller_busy_error)
-        else:
-            if not self.args:
-                self.caller.msg(self.no_object_given_error)
-            else:
-                target = self.caller.search(self.args)
-                if not target:
-                    self.caller.msg(self.object_notexist_error)
-                else:
-                    # this needs to happen last so each object can delete itself
-                    at_caller_function = getattr(self.caller, self.at_caller)
-                    self.msg(at_caller_function(target))
+            return
+        
+        if not self.args:
+            self.caller.msg(self.no_object_given_error)
+            return
+
+        # parse args for prepositions received by location
+        # we need to know the location to know if it accepts the preposition
+        prepositions = [x for x in self.args.split() 
+                                    if x in COMMAND_PREPOSITIONS]
+
+        preposition_count = len(prepositions)
+        if preposition_count > 1:
+            caller.msg(error_too_many_prepositions)
+            return
+        
+        # If a preposition is not necessary, this sets target from args
+        elif preposition_count == 0:
+            location = None  # not passed to search(), unnecessary 
+            
+            # some commands MUST have a preposition and a receiving object
+            if command_requires_preposition:
+                caller.msg(error_command_requires_preposition)
+                return
+
+            target = self.caller.search(self.args)
+            if not target:
+                self.caller.msg(self.object_notexist_error)
+                return
+
+        # If a preposition is necessary, this route handles args and errors
+        elif preposition_count == 1:
+            preposition = prepositions[0]
+            target_object, _prep, target_location = self.args.partition(preposition)
+            target_object = target_object.strip()
+            target_location = target_location.strip()
+
+            # don't continue if the preposition isn't valid in that location
+            # this does require that containers have the 'in' location.
+            # also, it may make a preposition a requirement for accessing a
+            # container. Is this good enough?
+            # things can be in things but inaccessible. good!
+            if preposition not in location.prepositions:
+                self.caller.msg(self.error_locationpreposition_notexist)
+                return
+
+            location = self.caller.search(target_location)
+            if not location:
+                self.caller.msg(self.error_location_notexist)
+                return
+
+            target = self.caller.search(target_object, location=location)
+            if not target:
+                self.caller.msg(self.object_notexist_error)
+                return
+
+
+        # update resulting messages to have the preposition if not Location
+        # example: "You touch the blanket in the basket."
+
+
+        # this needs to happen last so each object can delete itself
+        at_caller_function = getattr(self.caller, self.at_caller)
+        self.msg(at_caller_function(target))
 
 
 class CmdRead(CmdObjectInteraction):

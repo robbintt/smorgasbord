@@ -108,7 +108,7 @@ class ExtendedDefaultObject(object):
             self.ndb.busy = True
             utils.delay(target.db.focus_delay, 
                         callback=self.remove_busy_flag, 
-                        retval=[touch_done_message, target])
+                        retval=[focus_done_message, target])
 
         target.at_focused(focuser=self)
 
@@ -151,7 +151,7 @@ class ExtendedDefaultObject(object):
             self.ndb.busy = True
             utils.delay(target.db.read_delay, 
                         callback=self.remove_busy_flag, 
-                        retval=[touch_done_message, target])
+                        retval=[read_done_message, target])
 
             target.at_objectread(reader=self)
 
