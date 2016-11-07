@@ -409,6 +409,22 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
     with the object activating the verb before the verb is completed.
     This is good news, I think.
     """
+    def __init__(self):
+        super(CmdObjectInteraction, self).__init__()
+        
+        # this does not belong here, it needs registered globally and imported.
+        self.COMMAND_PREPOSITIONS = ["in", "under", "behind", "on"]
+        
+        # put other sane defaults here so they don't need redefined
+        self.disallowed_prepositions = []
+        self.error_preposition_disallowed = "You can't do that from here."
+        self.error_too_many_prepositions = "Please use only one preposition from: {}".format(self.COMMAND_PREPOSITIONS)
+        self.command_requires_preposition = False
+        self.error_command_requires_preposition = "This command requires a location."
+        self.error_location_notexist = "Can't find the location of the object."
+        self.error_locationpreposition_notexist = "You can't seem to get there on that."
+        self.caller_busy_error = "You are a little busy for that."
+
 
     def func(self):
         """ The method that handles any parsing and triggers the interaction
@@ -416,15 +432,6 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
         getattr is used to get the response of the caller's at_ function. The
         function name is contained in the at_caller string.
         """
-        # this does not belong here, it needs registered globally and imported.
-        COMMAND_PREPOSITIONS = ["in", "under", "behind", "on"]
-        
-        # put other sane defaults here so they don't need redefined
-        error_too_many_prepositions = "Please use only one preposition from: {}".format(COMMAND_PREPOSITIONS)
-        command_requires_preposition = False
-        error_requires_preposition = "This command requires a location."
-        error_location_notexist = "Can't find the location of the object."
-        error_locationpreposition_notexist = "You can't seem to get there on that."
         
         if self.caller.ndb.busy:
             self.caller.msg(self.caller_busy_error)
@@ -437,11 +444,11 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
         # parse args for prepositions received by location
         # we need to know the location to know if it accepts the preposition
         prepositions = [x for x in self.args.split() 
-                                    if x in COMMAND_PREPOSITIONS]
+                                    if x in self.COMMAND_PREPOSITIONS]
 
         preposition_count = len(prepositions)
         if preposition_count > 1:
-            caller.msg(error_too_many_prepositions)
+            caller.msg(self.error_too_many_prepositions)
             return
         
         # If a preposition is not necessary, this sets target from args
@@ -449,8 +456,8 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
             location = None  # not passed to search(), unnecessary 
             
             # some commands MUST have a preposition and a receiving object
-            if command_requires_preposition:
-                caller.msg(error_command_requires_preposition)
+            if self.command_requires_preposition:
+                caller.msg(self.error_command_requires_preposition)
                 return
 
             target = self.caller.search(self.args)
@@ -465,15 +472,6 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
             target_object = target_object.strip()
             target_location = target_location.strip()
 
-            # don't continue if the preposition isn't valid in that location
-            # this does require that containers have the 'in' location.
-            # also, it may make a preposition a requirement for accessing a
-            # container. Is this good enough?
-            # things can be in things but inaccessible. good!
-            if preposition not in location.prepositions:
-                self.caller.msg(self.error_locationpreposition_notexist)
-                return
-
             location = self.caller.search(target_location)
             if not location:
                 self.caller.msg(self.error_location_notexist)
@@ -484,6 +482,22 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
                 self.caller.msg(self.object_notexist_error)
                 return
 
+            # don't continue if the preposition isn't valid in that location
+            # this does require that containers have the 'in' location.
+            # also, it may make a preposition a requirement for accessing a
+            # container. Is this good enough?
+            # things can be in things but inaccessible. good!
+            if preposition not in location.db.prepositions:
+                self.caller.msg(self.error_locationpreposition_notexist)
+                return
+
+            # disallowed_prepositions and error_preposition_disallowed should be
+            # set in the child Command class. An example would be if you don't
+            # want people to read a book while it is in something.
+            if preposition in self.disallowed_prepositions:
+                self.caller.msg(self.error_preposition_disallowed)
+                return
+
 
         # update resulting messages to have the preposition if not Location
         # example: "You touch the blanket in the basket."
@@ -491,7 +505,7 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
 
         # this needs to happen last so each object can delete itself
         at_caller_function = getattr(self.caller, self.at_caller)
-        self.msg(at_caller_function(target))
+        self.msg(at_caller_function(target, target_location=location))
 
 
 class CmdRead(CmdObjectInteraction):
@@ -499,19 +513,20 @@ class CmdRead(CmdObjectInteraction):
     """
     key = "read"
     locks = "cmd:all()"
-    caller_busy_error = "You are a little busy for that."
     object_notexist_error = "Read what?"
     # no object given defaults to the same error as if the object is not found
     no_object_given_error = object_notexist_error
     # at_caller will trigger the at_called method for the specific verb
     at_caller = 'at_read'
+    # optional, default is no disallowed prepositions
+    disallowed_prepositions = ["in"]
+    error_preposition_disallowed = "You can't read that from here."
 
 class CmdFocus(CmdObjectInteraction):
     """ Use middleware to provide CmdFocus.
     """
     key = "focus"
     locks = "cmd:all()"
-    caller_busy_error = "You are a little busy for that."
     object_notexist_error = "Focus on what?"
     # no object given defaults to the same error as if the object is not found
     no_object_given_error = object_notexist_error
@@ -523,7 +538,6 @@ class CmdTouch(CmdObjectInteraction):
     """
     key = "touch"
     locks = "cmd:all()"
-    caller_busy_error = "You are a little busy for that."
     object_notexist_error = "Touch what?"
     # no object given defaults to the same error as if the object is not found
     no_object_given_error = object_notexist_error

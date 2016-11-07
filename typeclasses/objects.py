@@ -24,7 +24,7 @@ class ExtendedDefaultObject(object):
         """ This overloads the DefaultObject at_object_creation, which is empty.
         """
         self.db.weight = 1
-        self.prepositions = list()
+        self.db.prepositions = list()
 
     def remove_busy_flag(self, retval):
         """ Removes the busy flag from the caller object
@@ -48,7 +48,7 @@ class ExtendedDefaultObject(object):
             self.msg(caller_done_msg.format(target.key))
             
     
-    def at_touch(self, target):
+    def at_touch(self, target, target_location=None):
         """ Modelled after at_look, at_touch has its own lock: "touch"
 
         Ideally the multiple return control flow code pattern will be changed.
@@ -89,7 +89,7 @@ class ExtendedDefaultObject(object):
         pass
 
 
-    def at_focus(self, target):
+    def at_focus(self, target, target_location=None):
         """ Modelled after at_look, at_focus has its own lock: "focus"
         """
         if not target.access(self, "focus"):
@@ -126,7 +126,7 @@ class ExtendedDefaultObject(object):
         pass
 
 
-    def at_read(self, target):
+    def at_read(self, target, target_location=None):
         """ Modelled after at_look, at_read has its own lock: "read"
         """
         if not target.access(self, "read"):
