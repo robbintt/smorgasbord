@@ -409,9 +409,16 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
     with the object activating the verb before the verb is completed.
     This is good news, I think.
     """
+    # override as necessary in each command
+    arg_regex = r"\s|$"
+    locks = "cmd:all()"
+
     def __init__(self):
+        """
+        Override init as necessary
+        """
         super(CmdObjectInteraction, self).__init__()
-        
+
         # this does not belong here, it needs registered globally and imported.
         self.COMMAND_PREPOSITIONS = ["in", "under", "behind", "on"]
         
@@ -512,34 +519,31 @@ class CmdRead(CmdObjectInteraction):
     """ Use middleware to provide CmdRead.
     """
     key = "read"
-    locks = "cmd:all()"
-    object_notexist_error = "Read what?"
-    # no object given defaults to the same error as if the object is not found
-    no_object_given_error = object_notexist_error
-    # at_caller will trigger the at_called method for the specific verb
-    at_caller = 'at_read'
-    # optional, default is no disallowed prepositions
-    disallowed_prepositions = ["in"]
-    error_preposition_disallowed = "You can't read that from here."
+    at_caller = "at_read"
+    def __init__(self):
+        super(CmdRead, self).__init__()
+        self.object_notexist_error = "Read what?"
+        self.no_object_given_error = self.object_notexist_error
+        # optional, default is no disallowed prepositions
+        self.disallowed_prepositions += ["in"]
+        self.error_preposition_disallowed = "You can't read that from here."
 
 class CmdFocus(CmdObjectInteraction):
     """ Use middleware to provide CmdFocus.
     """
     key = "focus"
-    locks = "cmd:all()"
-    object_notexist_error = "Focus on what?"
-    # no object given defaults to the same error as if the object is not found
-    no_object_given_error = object_notexist_error
-    # at_caller will trigger the at_called method for the specific verb
-    at_caller = 'at_focus'
+    at_caller = "at_focus"
+    def __init__(self):
+        super(CmdFocus, self).__init__()
+        self.object_notexist_error = "Focus on what?"
+        self.no_object_given_error = self.object_notexist_error
 
 class CmdTouch(CmdObjectInteraction):
     """ Use middleware to provide CmdTouch.
     """
     key = "touch"
-    locks = "cmd:all()"
-    object_notexist_error = "Touch what?"
-    # no object given defaults to the same error as if the object is not found
-    no_object_given_error = object_notexist_error
-    # at_caller will trigger the at_called method for the specific verb
-    at_caller = 'at_touch'
+    at_caller = "at_touch"
+    def __init__(self):
+        super(CmdTouch, self).__init__()
+        self.object_notexist_error = "Touch what?"
+        self.no_object_given_error = self.object_notexist_error
