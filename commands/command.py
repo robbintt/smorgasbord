@@ -188,119 +188,6 @@ class Command(BaseCommand):
 #
 
 
-
-class CmdPut(COMMAND_DEFAULT_CLASS):
-    """ put X in Y command.
-
-    This command should be expanded to support on, under, etc. - however, objets must have these things...
-    
-    Modified from custom CmdGet (in this file)
-
-    FUTURE:
-    'put' - put an object into another object
-    The 'put' verb allows you to convey an object to a new location, generally
-    inside a container.
-    Mechanism: One object (generally character) conveys a second object into a
-    third object. The third object must be able to contain other objects.
-    Object1 - generally character
-    Object2 - object being moved
-    Object3 - container object
-    
-    HOW:
-    1. Object1 (inside Location1) uses the 'put' verb on Object2 and Object3
-    2. Object2 is searched for in: Object1, Location1
-        - A custom search can be done later using search() method features
-    3. (Object2 must be touched by Object1, so it must do a 'get' interaction)
-        - Object2 would then be inside Object1...
-        - IMPORTANT: So should this interaction be managed and completed???
-    4. Object1 notifies Object2 and Object3:
-        1. Object1 tells Object2 it wishes to put Object2 inside Object3.
-            - The verb 'put' called from Object1 gives Object3 to Object2
-            - 
-        2. Object1 tells Object3 it wishes to put Object2 inside Object3.
-        3. Either method may reject the interaction and give Object1 an error.
-        4. At this point, Object2 may either be in Object1 or 
-            at its original location? How are errors resolved?
-    5. Object3 accepts Object2. Follow the Object2.move_to(Object3) pattern.
-        - The Object2.at_moved() method interacts with Object1 and then Object3
-        - This should happen in the Object3.at_received() method.
-    6. Any tests are performed in at_moved() and at_receive()
-
-    NOTE:
-    In a sense this is already happening with search but location does not get
-    a say in if the get and put command succeeds.
-    BENEFIT:
-    Locations can easily have item or weight limits or interact with with the
-    player by acting differently when items are dropped or taken if this
-    paradigm is generalized.
-    """
-    key = "put"
-    locks = "cmd:all()"
-    arg_regex = r"\s|$"
-
-    def func(self):
-        "implements the command."
-
-        caller = self.caller
-
-        if not self.args:
-            caller.msg("Put what?")
-            return
-
-        in_count = len([x for x in self.args.split() if x == "in"])
-        if in_count > 1:
-            caller.msg("Too many 'in' terms, please use 'in' once to retrieve from a container.")
-            return
-
-        if in_count < 1:
-            caller.msg("Put {} in what?".format(self.args))
-            return
-
-        elif in_count == 1:
-            item, _, container = self.args.partition(" in ")
-            # default to caller as location (in "hands") or however it works.
-            # this is bad as it always defaults to caller first, so if caller has 3
-            # backpacks and there are 3 on the ground, then you cannot access the 3 
-            # on the ground.  other MUDs use 'my' to signify one in my inventory.
-            # now i see why.
-            destination = caller.search(container, location=caller, nofound_string=" ")
-            if not destination:
-                destination = caller.search(container, location=caller.location, nofound_string="Put it where?")
-            if not destination:
-                return
-            caller_message = "You put {object} in {location}."
-            location_message = "{caller} puts {object} in {location}."
-
-        location = caller.location
-
-        # consider making this search silent and using the commented message if it is not found
-        obj = caller.search(item, location=caller, nofound_string=" ")
-        if not obj:
-            obj = caller.search(item, location=location, nofound_string="Put what?")
-            if not obj:
-                return
-        if caller is obj:
-            caller.msg("You can't think of a way to do that.")
-            return
-        if destination is obj:
-            caller.msg("You cannot put something inside itself.")
-            return
-        if not obj.access(caller, 'put'):
-            if obj.db.get_err_msg:
-                caller.msg(obj.db.get_err_msg)
-            else:
-                caller.msg("You can't get that.")
-            return
-
-        message_data = { "object" : obj.name, "location" : destination, "caller" : caller }
-        obj.move_to(destination, quiet=True)
-        caller.msg(caller_message.format(**message_data))
-        caller.location.msg_contents(location_message.format(**message_data),
-                                     exclude=caller)
-        # calling hook method
-        obj.at_put(caller)
-
-
 class CmdObjectInteraction(default_cmds.MuxCommand):
     """ middleware Class for any command in which 2 objects interact
 
@@ -383,7 +270,7 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
 
         preposition_count = len(prepositions)
         if preposition_count > 1:
-            caller.msg(self.error_too_many_prepositions)
+            self.caller.msg(self.error_too_many_prepositions)
             return
         
         # If a preposition is not necessary, this sets target from args
@@ -393,7 +280,7 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
             
             # some commands MUST have a preposition and a receiving object
             if self.command_requires_preposition:
-                caller.msg(self.error_command_requires_preposition)
+                self.caller.msg(self.error_command_requires_preposition)
                 return
 
             target = self.caller.search(self.args)
@@ -412,6 +299,9 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
             if not location:
                 self.caller.msg(self.error_location_notexist)
                 return
+            contents = [obj for obj in location.contents 
+                    if obj.access(self.caller, self.key)
+                    and obj.db.sublocation == preposition]
 
             # switch the location and the source if the command is a 'put'
             if self.key == "put":
@@ -420,7 +310,8 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
                 target = self.caller.search(target_object)
             # every command other than 'put' uses this else statement
             else:
-                target = self.caller.search(target_object, location=location)
+                # contents is location.contents filtered by preposition
+                target = self.caller.search(target_object, candidates=contents)
             if not target:
                 self.caller.msg(self.object_notexist_error)
                 return
@@ -504,7 +395,7 @@ class CmdGet(CmdObjectInteraction):
         self.no_object_given_error = self.object_notexist_error
 
 class CmdPut(CmdObjectInteraction):
-    """ Use middleware to provide CmdGet.
+    """ Use middleware to provide CmdPut.
 
     In a sense, get is a weak 'put'.
     Get just puts the item in caller.

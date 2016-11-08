@@ -25,6 +25,7 @@ class ExtendedDefaultObject(object):
         """
         self.db.weight = 1
         self.db.prepositions = list()
+        self.db.sublocation = None
 
     def remove_busy_flag(self, retval):
         """ Removes the busy flag from the caller object
@@ -91,6 +92,11 @@ class ExtendedDefaultObject(object):
         
         # perform the move
         target.move_to(self, quiet=True)
+        # this currently happens in at_get and at_put but it should probably
+        # happen in a single location that detects the object has been moved
+        # or is informed that the object is changing location and removes or
+        # updates the sublocation accordingly
+        target.db.sublocation = None
 
         # A different get delay can be defined and used in at_got
         get_done_message = "You finish getting the {}."
@@ -169,6 +175,10 @@ class ExtendedDefaultObject(object):
         
         # perform the move
         target.move_to(target_location, quiet=True)
+        # this sublocation should aggressively clear whenever the object
+        # is informed that it has moved. right now get/put move the object,
+        # but it may make more sense to have a generic 'moved' detector.
+        target.db.sublocation = preposition
 
         # A different put delay can be defined and used in at_objput
         put_done_message = "You finish putting the {}."
@@ -323,6 +333,91 @@ class ExtendedDefaultObject(object):
         """
         pass
 
+
+    # below is the default at_look handlers from evennia/objects/objects.py
+    
+    # look can be retrofitted for the at_command style actions.
+    # the code pattern used to filter visible objects may be helpful
+    # for filtering by preposition/sublocation in the generic commands
+    # the idea would be to first filter by sublocation then run a search
+    # on the filtered list.
+
+    # search() takes a list in its location, so we could technically build
+    # a custom list then use the default search. this is the swiftest route.
+
+    def return_appearance(self, looker):
+        """
+        This formats a description. It is the hook a 'look' command
+        should call.
+
+        Args:
+            looker (Object): Object doing the looking.
+        """
+        if not looker:
+            return
+        # get and identify all objects
+        visible = (obj for obj in self.contents 
+                if obj != looker and
+                obj.access(looker, "view"))
+
+        exits, users, things = [], [], []
+        for obj in visible:
+            key = obj.get_display_name(looker)
+            if obj.destination:
+                exits.append(key)
+            elif obj.has_player:
+                users.append("{c%s{n" % key)
+            else:
+                things.append(key)
+        # get description, build string
+        string = "{c%s{n\n" % self.get_display_name(looker)
+        desc = self.db.desc
+        if desc:
+            string += "%s" % desc
+        if exits:
+            string += "\n{wExits:{n " + ", ".join(exits)
+        if users or things:
+            string += "\n{wYou see:{n " + ", ".join(users + things)
+        return string
+
+    def at_look(self, target):
+        """
+        Called when this object performs a look. It allows to
+        customize just what this means. It will not itself
+        send any data.
+
+        Args:
+            target (Object): The target being looked at. This is
+                commonly an object or the current location. It will
+                be checked for the "view" type access.
+
+        Returns:
+            lookstring (str): A ready-processed look string
+                potentially ready to return to the looker.
+
+        """
+        if not target.access(self, "view"):
+            try:
+                return "Could not view '%s'." % target.get_display_name(self)
+            except AttributeError:
+                return "Could not view '%s'." % target.key
+
+        description = target.return_appearance(self)
+
+        # the target's at_desc() method.
+        # this must be the last reference to target so it may delete itself when acted on.
+        target.at_desc(looker=self)
+
+        return description
+
+    def at_desc(self, looker=None):
+        """
+        This is called whenever someone looks at this object.
+
+        looker (Object): The object requesting the description.
+
+        """
+        pass
 
 
 class Object(ExtendedDefaultObject, DefaultObject):
