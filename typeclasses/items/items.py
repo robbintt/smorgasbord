@@ -3,6 +3,16 @@
 from typeclasses.objects import Object
 from evennia import utils
 
+class Item(Object):
+    def at_object_creation(self):
+        """
+        """
+        super(Item, self).at_object_creation()
+        self.locks.add("get:all()")
+        self.locks.add("put:all()")
+        self.locks.add("touch:all()")
+
+
 class Furniture(Object):
     """ Contains defaults for items used to furnish a room.
     """

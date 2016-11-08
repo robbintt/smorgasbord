@@ -291,7 +291,8 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
         # If a preposition is necessary, this route handles args and errors
         elif preposition_count == 1:
             preposition = prepositions[0]
-            target_object, _prep, target_location = self.args.partition(preposition)
+            preposition_parsed = " " + preposition + " "
+            target_object, _prep, target_location = self.args.partition(preposition_parsed)
             target_object = target_object.strip()
             target_location = target_location.strip()
 
