@@ -92,8 +92,8 @@ class ExtendedDefaultObject(object):
         # perform the move
         target.move_to(self, quiet=True)
 
-        # A different touch delay can be defined and used in at_touched
-        get_done_message = "You finish touching the {}."
+        # A different get delay can be defined and used in at_got
+        get_done_message = "You finish getting the {}."
         if target.db.get_delay > 0:
             self.ndb.busy = True
             utils.delay(target.db.get_delay, 
@@ -126,6 +126,81 @@ class ExtendedDefaultObject(object):
 
     def at_got_from(self, getter=None, target=None, preposition=None):
         """ This is called when 'get' is used on an object in this object.
+        """
+        pass
+
+
+    def at_put(self, target, target_location=None, preposition=None):
+        """ Modelled after at_look and the original CmdGet.
+        """
+
+        if target == self:
+            self.msg("You can't put yourself!")
+            return
+
+        if not target_location:
+            self.msg("Where do you want to put this?")
+            return
+
+        if target_location == self:
+            self.msg("You can't quite figure out how to do that.")
+            return
+
+        # this messaging style is not used elsewhere... the Cmd where this
+        # method is called tries to message the caller with the return value
+        # but many other interactions in this at_caller style functions
+        # message the player on their own and return nothing. Which pattern
+        # is best to use?  at_caller functions here need refactored and
+        # DRY'd out.
+        if not target.access(self, "put"):
+            try:
+                return "You could not move the {}.".format(target.get_display_name(self),)
+            except AttributeError:
+                return "You could not move the {}.".format(target.key,)
+
+        # location/room at_got_room() method performs checks
+        # if any value is returned, abort before move
+        # note that this returns an empty message:
+        #     at_got_from must tell the character what happened.
+        if target_location and target_location.at_objput_from( putter=self, 
+                                        target=target, 
+                                        preposition=preposition):
+            return
+        
+        # perform the move
+        target.move_to(target_location, quiet=True)
+
+        # A different put delay can be defined and used in at_objput
+        put_done_message = "You finish putting the {}."
+        if target.db.put_delay > 0:
+            self.ndb.busy = True
+            utils.delay(target.db.put_delay, 
+                        callback=self.remove_busy_flag, 
+                        retval=[put_done_message, target])
+        
+        # send custom messages to the room about the move
+        # need to bring this data in from wherever it is
+        if preposition:
+            caller_message = "You put {object} {preposition} {location}."
+            location_message = "{caller} puts {object} {preposition} {location}."
+        message_data = { "object" : target.name, "location" : target_location, "caller" : self, "preposition": preposition }
+        self.msg(caller_message.format(**message_data))
+        self.location.msg_contents(location_message.format(**message_data),
+                                     exclude=self)
+        
+        target.at_objput(putter=self)
+
+
+    def at_objput(self, putter=None):
+        """ This is called whenever someone puts this object.
+
+        Follows the same code pattern as at_desc, a function used by at_look
+        """
+        pass
+
+
+    def at_objput_from(self, putter=None, target=None, preposition=None):
+        """ This is called when 'put' is used on an object in this object.
         """
         pass
 
@@ -248,11 +323,6 @@ class ExtendedDefaultObject(object):
         """
         pass
 
-
-    def at_put(self, putter):
-        """ called after an object has been put in a container. Does not stop put.
-        """
-        pass
 
 
 class Object(ExtendedDefaultObject, DefaultObject):

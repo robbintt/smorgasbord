@@ -366,6 +366,7 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
         getattr is used to get the response of the caller's at_ function. The
         function name is contained in the at_caller string.
         """
+
         
         if self.caller.ndb.busy:
             self.caller.msg(self.caller_busy_error)
@@ -412,7 +413,14 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
                 self.caller.msg(self.error_location_notexist)
                 return
 
-            target = self.caller.search(target_object, location=location)
+            # switch the location and the source if the command is a 'put'
+            if self.key == "put":
+                # optionally the location could be the caller
+                # this would turn off 'put' from the ground
+                target = self.caller.search(target_object)
+            # every command other than 'put' uses this else statement
+            else:
+                target = self.caller.search(target_object, location=location)
             if not target:
                 self.caller.msg(self.object_notexist_error)
                 return
@@ -493,4 +501,18 @@ class CmdGet(CmdObjectInteraction):
     def __init__(self):
         super(CmdGet, self).__init__()
         self.object_notexist_error = "Get what?"
+        self.no_object_given_error = self.object_notexist_error
+
+class CmdPut(CmdObjectInteraction):
+    """ Use middleware to provide CmdGet.
+
+    In a sense, get is a weak 'put'.
+    Get just puts the item in caller.
+    Consider this when structuring at_get and at_put
+    """
+    key = "put"
+    at_caller = "at_put"
+    def __init__(self):
+        super(CmdPut, self).__init__()
+        self.object_notexist_error = "Put what?"
         self.no_object_given_error = self.object_notexist_error
