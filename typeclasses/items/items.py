@@ -13,7 +13,7 @@ class Furniture(Object):
         self.locks.add("get:false()")
         self.locks.add("put:false()")
         self.locks.add("touch:all()")
-        self.db.prepositions += ["behind", "under"]
+        self.db.prepositions += ["behind", "under", "on"]
 
 
 class Container(Object):
