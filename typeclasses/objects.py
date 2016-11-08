@@ -47,8 +47,90 @@ class ExtendedDefaultObject(object):
         except AttributeError:
             self.msg(caller_done_msg.format(target.key))
             
+
+    def at_get(self, target, target_location=None, preposition=None):
+        """ Modelled after at_look and the original CmdGet.
+
+        if the object is too hot to hold or something, the at_got method still 
+        gets a chance to interact with everything.
+
+        When does the location of the got object get to run its checks?
+        - it needs to test the object preposition before or after search.
+        - or include the object attribute in the search.
+        - how can i chain search?
+        """
+
+        if target == self:
+            self.msg("You can't get yourself!")
+            return
+
+        if target.location == self:
+            self.msg("You already have that!")
+            return
+
+        # this messaging style is not used elsewhere... the Cmd where this
+        # method is called tries to message the caller with the return value
+        # but many other interactions in this at_caller style functions
+        # message the player on their own and return nothing. Which pattern
+        # is best to use?  at_caller functions here need refactored and
+        # DRY'd out.
+        if not target.access(self, "get"):
+            try:
+                return "You could not get the {}.".format(target.get_display_name(self),)
+            except AttributeError:
+                return "You could not get the {}.".format(target.key,)
+
+        # location/room at_got_room() method performs checks
+        # if any value is returned, abort before move
+        # note that this returns an empty message:
+        #     at_got_from must tell the character what happened.
+        if target_location and target_location.at_got_from( getter=self, 
+                                        target=target, 
+                                        preposition=preposition):
+            return
+        
+        # perform the move
+        target.move_to(self, quiet=True)
+
+        # A different touch delay can be defined and used in at_touched
+        get_done_message = "You finish touching the {}."
+        if target.db.get_delay > 0:
+            self.ndb.busy = True
+            utils.delay(target.db.get_delay, 
+                        callback=self.remove_busy_flag, 
+                        retval=[get_done_message, target])
+        
+        # send custom messages to the room about the move
+        # need to bring this data in from wherever it is
+        if target_location:
+            caller_message = "You get {object} from {location}."
+            location_message = "{caller} gets {object} from {location}."
+        else:
+            caller_message = "You pick up {object}."
+            location_message = "{caller} picks up {object}."
+        message_data = { "object" : target.name, "location" : target_location, "caller" : self }
+        self.msg(caller_message.format(**message_data))
+        self.location.msg_contents(location_message.format(**message_data),
+                                     exclude=self)
+        
+        target.at_got(getter=self)
+        
+
+    def at_got(self, getter=None):
+        """ This is called whenever someone gets this object.
+
+        Follows the same code pattern as at_desc, a function used by at_look
+        """
+        pass
+
+
+    def at_got_from(self, getter=None, target=None, preposition=None):
+        """ This is called when 'get' is used on an object in this object.
+        """
+        pass
+
     
-    def at_touch(self, target, target_location=None):
+    def at_touch(self, target, target_location=None, preposition=None):
         """ Modelled after at_look, at_touch has its own lock: "touch"
 
         Ideally the multiple return control flow code pattern will be changed.
@@ -89,7 +171,7 @@ class ExtendedDefaultObject(object):
         pass
 
 
-    def at_focus(self, target, target_location=None):
+    def at_focus(self, target, target_location=None, preposition=None):
         """ Modelled after at_look, at_focus has its own lock: "focus"
         """
         if not target.access(self, "focus"):
@@ -126,7 +208,7 @@ class ExtendedDefaultObject(object):
         pass
 
 
-    def at_read(self, target, target_location=None):
+    def at_read(self, target, target_location=None, preposition=None):
         """ Modelled after at_look, at_read has its own lock: "read"
         """
         if not target.access(self, "read"):
