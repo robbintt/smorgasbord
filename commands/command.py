@@ -187,159 +187,6 @@ class Command(BaseCommand):
 #                self.character = None
 #
 
-class CmdGet(COMMAND_DEFAULT_CLASS):
-    """ Modified from standard CmdGet
-    
-    Modified version checks to see if self.args has " in ". If it does, then
-    the location, arg2, is set as the location and the command proceeds.
-
-
-    Standard CmdGet DocString:
-    =================
-    pick up something
-
-    Usage:
-      get <obj>
-
-    Picks up an object from your location and puts it in
-    your inventory.
-    """
-    key = "get"
-    aliases = "take" # how do i do two aliases?
-    locks = "cmd:all()"
-    arg_regex = r"\s|$"
-
-    def func(self):
-        "implements the command."
-
-        caller = self.caller
-
-        if not self.args:
-            caller.msg("Get what?")
-            return
-
-        in_count = len([x for x in self.args.split() if x == "in"])
-        if in_count > 1:
-            caller.msg("Too many 'in' terms, please use 'in' once to retrieve from a container.")
-            return
-
-        elif in_count == 1:
-            item, _, container = self.args.partition(" in ")
-            location = caller.search(container, location=caller.location)
-            if not location:
-                caller.msg("Could not find {}".format(container))
-                return
-            caller_message = "You get {object} from {location}."
-            location_message = "{caller} gets {object} from {location}."
-        else:
-            item = self.args
-            location = caller.location
-            caller_message = "You pick up {object}."
-            location_message = "{caller} picks up {object}"
-
-
-        # consider making this search silent and using the commented message if it is not found
-        obj = caller.search(item, location=location)
-        if not obj:
-            # caller.msg("Get what?")
-            return
-        if caller == obj:
-            caller.msg("You can't get yourself.")
-            return
-        if not obj.access(caller, 'get'):
-            if obj.db.get_err_msg:
-                caller.msg(obj.db.get_err_msg)
-            else:
-                caller.msg("You can't get that.")
-            return
-
-        message_data = { "object" : obj.name, "location" : location, "caller" : caller }
-        obj.move_to(caller, quiet=True)
-        caller.msg(caller_message.format(**message_data))
-        caller.location.msg_contents(location_message.format(**message_data),
-                                     exclude=caller)
-        # calling hook method
-        obj.at_get(caller)
-
-
-class CmdPut(COMMAND_DEFAULT_CLASS):
-    """ put X in Y command.
-
-    This command should be expanded to support on, under, etc. - however, objets must have these things...
-    
-    Modified from custom CmdGet (in this file)
-    """
-    key = "put"
-    locks = "cmd:all()"
-    arg_regex = r"\s|$"
-
-    def func(self):
-        "implements the command."
-
-        caller = self.caller
-
-        if not self.args:
-            caller.msg("Put what?")
-            return
-
-        in_count = len([x for x in self.args.split() if x == "in"])
-        if in_count > 1:
-            caller.msg("Too many 'in' terms, please use 'in' once to retrieve from a container.")
-            return
-
-        if in_count < 1:
-            caller.msg("Put {} in what?".format(self.args))
-            return
-
-        elif in_count == 1:
-            item, _, container = self.args.partition(" in ")
-            # default to caller as location (in "hands") or however it works.
-            # this is bad as it always defaults to caller first, so if caller has 3
-            # backpacks and there are 3 on the ground, then you cannot access the 3 
-            # on the ground.  other MUDs use 'my' to signify one in my inventory.
-            # now i see why.
-            destination = caller.search(container, location=caller, nofound_string=" ")
-            if not destination:
-                destination = caller.search(container, location=caller.location, nofound_string="Put it where?")
-            if not destination:
-                return
-            caller_message = "You put {object} in {location}."
-            location_message = "{caller} puts {object} in {location}."
-
-        location = caller.location
-
-        # consider making this search silent and using the commented message if it is not found
-        obj = caller.search(item, location=caller, nofound_string=" ")
-        if not obj:
-            obj = caller.search(item, location=location, nofound_string="Put what?")
-            if not obj:
-                return
-        if caller is obj:
-            caller.msg("You can't think of a way to do that.")
-            return
-        if destination is obj:
-            caller.msg("You cannot put something inside itself.")
-            return
-        if not obj.access(caller, 'put'):
-            if obj.db.get_err_msg:
-                caller.msg(obj.db.get_err_msg)
-            else:
-                caller.msg("You can't get that.")
-            return
-
-        message_data = { "object" : obj.name, "location" : destination, "caller" : caller }
-        obj.move_to(destination, quiet=True)
-        caller.msg(caller_message.format(**message_data))
-        caller.location.msg_contents(location_message.format(**message_data),
-                                     exclude=caller)
-        # calling hook method
-        obj.at_put(caller)
-
-
-        
-
-
-
 
 class CmdObjectInteraction(default_cmds.MuxCommand):
     """ middleware Class for any command in which 2 objects interact
@@ -363,8 +210,42 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
     no_object_given_error = object_notexist_error
     # at_caller will trigger the at_called method for the specific verb
     at_caller = 'at_read'
-
+    
+    FUTURE: 
+    generalizing this for prepositions clears the way for both location
+    specific searches and for three-way interactions like 'put' and 'get'.
+    Can they fit in the same method?
+    Under the 'read, focus, touch' paradigm, the object following the
+    preposition defines the search() space.  Under the 'get, put' paradigm,
+    the preposition defines the search space as well.  In fact, any of these
+    verbs without a preposition defines the search space, too.  The question
+    is whether we want the 'location' to have an opportunity to interact
+    with the object activating the verb before the verb is completed.
+    This is good news, I think.
     """
+    # override as necessary in each command
+    arg_regex = r"\s|$"
+    locks = "cmd:all()"
+
+    def __init__(self):
+        """
+        Override init as necessary
+        """
+        super(CmdObjectInteraction, self).__init__()
+
+        # this does not belong here, it needs registered globally and imported.
+        self.COMMAND_PREPOSITIONS = ["in", "under", "behind", "on"]
+        
+        # put other sane defaults here so they don't need redefined
+        self.disallowed_prepositions = []
+        self.error_preposition_disallowed = "You can't do that from here."
+        self.error_too_many_prepositions = "Please use only one preposition from: {}".format(self.COMMAND_PREPOSITIONS)
+        self.command_requires_preposition = False
+        self.error_command_requires_preposition = "This command requires a location."
+        self.error_location_notexist = "Can't find the location of the object."
+        self.error_locationpreposition_notexist = "You can't seem to get there on that."
+        self.caller_busy_error = "You are a little busy for that."
+
 
     def func(self):
         """ The method that handles any parsing and triggers the interaction
@@ -372,53 +253,157 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
         getattr is used to get the response of the caller's at_ function. The
         function name is contained in the at_caller string.
         """
+
+        
         if self.caller.ndb.busy:
             self.caller.msg(self.caller_busy_error)
-        else:
-            if not self.args:
-                self.caller.msg(self.no_object_given_error)
+            return
+        
+        if not self.args:
+            self.caller.msg(self.no_object_given_error)
+            return
+
+        # parse args for prepositions received by location
+        # we need to know the location to know if it accepts the preposition
+        prepositions = [x for x in self.args.split() 
+                                    if x in self.COMMAND_PREPOSITIONS]
+
+        preposition_count = len(prepositions)
+        if preposition_count > 1:
+            self.caller.msg(self.error_too_many_prepositions)
+            return
+        
+        # If a preposition is not necessary, this sets target from args
+        elif preposition_count == 0:
+            preposition = None 
+            location = None
+            
+            # some commands MUST have a preposition and a receiving object
+            if self.command_requires_preposition:
+                self.caller.msg(self.error_command_requires_preposition)
+                return
+
+            target = self.caller.search(self.args)
+            if not target:
+                self.caller.msg(self.object_notexist_error)
+                return
+
+        # If a preposition is necessary, this route handles args and errors
+        elif preposition_count == 1:
+            preposition = prepositions[0]
+            target_object, _prep, target_location = self.args.partition(preposition)
+            target_object = target_object.strip()
+            target_location = target_location.strip()
+
+            location = self.caller.search(target_location)
+            if not location:
+                self.caller.msg(self.error_location_notexist)
+                return
+            contents = [obj for obj in location.contents 
+                    if obj.access(self.caller, self.key)
+                    and obj.db.sublocation == preposition]
+
+            # switch the location and the source if the command is a 'put'
+            if self.key == "put":
+                # optionally the location could be the caller
+                # this would turn off 'put' from the ground
+                target = self.caller.search(target_object)
+            # every command other than 'put' uses this else statement
             else:
-                target = self.caller.search(self.args)
-                if not target:
-                    self.caller.msg(self.object_notexist_error)
-                else:
-                    # this needs to happen last so each object can delete itself
-                    at_caller_function = getattr(self.caller, self.at_caller)
-                    self.msg(at_caller_function(target))
+                # contents is location.contents filtered by preposition
+                target = self.caller.search(target_object, candidates=contents)
+            if not target:
+                self.caller.msg(self.object_notexist_error)
+                return
+
+            # don't continue if the preposition isn't valid in that location
+            # this does require that containers have the 'in' location.
+            # also, it may make a preposition a requirement for accessing a
+            # container. Is this good enough?
+            # things can be in things but inaccessible. good!
+            if preposition not in location.db.prepositions:
+                self.caller.msg(self.error_locationpreposition_notexist)
+                return
+
+            # disallowed_prepositions and error_preposition_disallowed should be
+            # set in the child Command class. An example would be if you don't
+            # want people to read a book while it is in something.
+            if preposition in self.disallowed_prepositions:
+                self.caller.msg(self.error_preposition_disallowed)
+                return
+
+
+        # update resulting messages to have the preposition if not Location
+        # example: "You touch the blanket in the basket."
+
+
+        # this needs to happen last so each object can delete itself
+        at_caller_function = getattr(self.caller, self.at_caller)
+        self.msg(at_caller_function(
+            target, 
+            target_location=location, 
+            preposition=preposition))
 
 
 class CmdRead(CmdObjectInteraction):
     """ Use middleware to provide CmdRead.
     """
     key = "read"
-    locks = "cmd:all()"
-    caller_busy_error = "You are a little busy for that."
-    object_notexist_error = "Read what?"
-    # no object given defaults to the same error as if the object is not found
-    no_object_given_error = object_notexist_error
-    # at_caller will trigger the at_called method for the specific verb
-    at_caller = 'at_read'
+    at_caller = "at_read"
+    def __init__(self):
+        super(CmdRead, self).__init__()
+        self.object_notexist_error = "Read what?"
+        self.no_object_given_error = self.object_notexist_error
+        # optional, default is no disallowed prepositions
+        self.disallowed_prepositions += ["in"]
+        self.error_preposition_disallowed = "You can't read that from here."
 
 class CmdFocus(CmdObjectInteraction):
     """ Use middleware to provide CmdFocus.
     """
     key = "focus"
-    locks = "cmd:all()"
-    caller_busy_error = "You are a little busy for that."
-    object_notexist_error = "Focus on what?"
-    # no object given defaults to the same error as if the object is not found
-    no_object_given_error = object_notexist_error
-    # at_caller will trigger the at_called method for the specific verb
-    at_caller = 'at_focus'
+    at_caller = "at_focus"
+    def __init__(self):
+        super(CmdFocus, self).__init__()
+        self.object_notexist_error = "Focus on what?"
+        self.no_object_given_error = self.object_notexist_error
 
 class CmdTouch(CmdObjectInteraction):
     """ Use middleware to provide CmdTouch.
     """
     key = "touch"
-    locks = "cmd:all()"
-    caller_busy_error = "You are a little busy for that."
-    object_notexist_error = "Touch what?"
-    # no object given defaults to the same error as if the object is not found
-    no_object_given_error = object_notexist_error
-    # at_caller will trigger the at_called method for the specific verb
-    at_caller = 'at_touch'
+    at_caller = "at_touch"
+    def __init__(self):
+        super(CmdTouch, self).__init__()
+        self.object_notexist_error = "Touch what?"
+        self.no_object_given_error = self.object_notexist_error
+
+
+class CmdGet(CmdObjectInteraction):
+    """ Use middleware to provide CmdGet.
+
+    In a sense, get is a weak 'put'.
+    Get just puts the item in caller.
+    Consider this when structuring at_get and at_put
+    """
+    key = "get"
+    aliases = "take"
+    at_caller = "at_get"
+    def __init__(self):
+        super(CmdGet, self).__init__()
+        self.object_notexist_error = "Get what?"
+        self.no_object_given_error = self.object_notexist_error
+
+class CmdPut(CmdObjectInteraction):
+    """ Use middleware to provide CmdPut.
+
+    In a sense, get is a weak 'put'.
+    Get just puts the item in caller.
+    Consider this when structuring at_get and at_put
+    """
+    key = "put"
+    at_caller = "at_put"
+    def __init__(self):
+        super(CmdPut, self).__init__()
+        self.object_notexist_error = "Put what?"
+        self.no_object_given_error = self.object_notexist_error

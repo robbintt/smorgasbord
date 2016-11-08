@@ -17,13 +17,15 @@ class ExtendedDefaultObject(object):
     """ Mixin adds additional functionality across the board
 
     This object is mixed into: Room, Character, Object
+    It should be listed first, overriding the default inheritance
     Should it go other places?
-
-    This object doesn't NEED to inherit from DefaultObject as it is
-    a mixin into descendants of DefaultObject.  
-    
-    The inheritance can probably just be removed with no effect.
     """
+    def at_object_creation(self):
+        """ This overloads the DefaultObject at_object_creation, which is empty.
+        """
+        self.db.weight = 1
+        self.db.prepositions = list()
+        self.db.sublocation = None
 
     def remove_busy_flag(self, retval):
         """ Removes the busy flag from the caller object
@@ -46,8 +48,174 @@ class ExtendedDefaultObject(object):
         except AttributeError:
             self.msg(caller_done_msg.format(target.key))
             
+
+    def at_get(self, target, target_location=None, preposition=None):
+        """ Modelled after at_look and the original CmdGet.
+
+        if the object is too hot to hold or something, the at_got method still 
+        gets a chance to interact with everything.
+
+        When does the location of the got object get to run its checks?
+        - it needs to test the object preposition before or after search.
+        - or include the object attribute in the search.
+        - how can i chain search?
+        """
+
+        if target == self:
+            self.msg("You can't get yourself!")
+            return
+
+        if target.location == self:
+            self.msg("You already have that!")
+            return
+
+        # this messaging style is not used elsewhere... the Cmd where this
+        # method is called tries to message the caller with the return value
+        # but many other interactions in this at_caller style functions
+        # message the player on their own and return nothing. Which pattern
+        # is best to use?  at_caller functions here need refactored and
+        # DRY'd out.
+        if not target.access(self, "get"):
+            try:
+                return "You could not get the {}.".format(target.get_display_name(self),)
+            except AttributeError:
+                return "You could not get the {}.".format(target.key,)
+
+        # location/room at_got_room() method performs checks
+        # if any value is returned, abort before move
+        # note that this returns an empty message:
+        #     at_got_from must tell the character what happened.
+        if target_location and target_location.at_got_from( getter=self, 
+                                        target=target, 
+                                        preposition=preposition):
+            return
+        
+        # perform the move
+        target.move_to(self, quiet=True)
+        # this currently happens in at_get and at_put but it should probably
+        # happen in a single location that detects the object has been moved
+        # or is informed that the object is changing location and removes or
+        # updates the sublocation accordingly
+        target.db.sublocation = None
+
+        # A different get delay can be defined and used in at_got
+        get_done_message = "You finish getting the {}."
+        if target.db.get_delay > 0:
+            self.ndb.busy = True
+            utils.delay(target.db.get_delay, 
+                        callback=self.remove_busy_flag, 
+                        retval=[get_done_message, target])
+        
+        # send custom messages to the room about the move
+        # need to bring this data in from wherever it is
+        if target_location:
+            caller_message = "You get {object} from {location}."
+            location_message = "{caller} gets {object} from {location}."
+        else:
+            caller_message = "You pick up {object}."
+            location_message = "{caller} picks up {object}."
+        message_data = { "object" : target.name, "location" : target_location, "caller" : self }
+        self.msg(caller_message.format(**message_data))
+        self.location.msg_contents(location_message.format(**message_data),
+                                     exclude=self)
+        
+        target.at_got(getter=self)
+        
+
+    def at_got(self, getter=None):
+        """ This is called whenever someone gets this object.
+
+        Follows the same code pattern as at_desc, a function used by at_look
+        """
+        pass
+
+
+    def at_got_from(self, getter=None, target=None, preposition=None):
+        """ This is called when 'get' is used on an object in this object.
+        """
+        pass
+
+
+    def at_put(self, target, target_location=None, preposition=None):
+        """ Modelled after at_look and the original CmdGet.
+        """
+
+        if target == self:
+            self.msg("You can't put yourself!")
+            return
+
+        if not target_location:
+            self.msg("Where do you want to put this?")
+            return
+
+        if target_location == self:
+            self.msg("You can't quite figure out how to do that.")
+            return
+
+        # this messaging style is not used elsewhere... the Cmd where this
+        # method is called tries to message the caller with the return value
+        # but many other interactions in this at_caller style functions
+        # message the player on their own and return nothing. Which pattern
+        # is best to use?  at_caller functions here need refactored and
+        # DRY'd out.
+        if not target.access(self, "put"):
+            try:
+                return "You could not move the {}.".format(target.get_display_name(self),)
+            except AttributeError:
+                return "You could not move the {}.".format(target.key,)
+
+        # location/room at_got_room() method performs checks
+        # if any value is returned, abort before move
+        # note that this returns an empty message:
+        #     at_got_from must tell the character what happened.
+        if target_location and target_location.at_objput_from( putter=self, 
+                                        target=target, 
+                                        preposition=preposition):
+            return
+        
+        # perform the move
+        target.move_to(target_location, quiet=True)
+        # this sublocation should aggressively clear whenever the object
+        # is informed that it has moved. right now get/put move the object,
+        # but it may make more sense to have a generic 'moved' detector.
+        target.db.sublocation = preposition
+
+        # A different put delay can be defined and used in at_objput
+        put_done_message = "You finish putting the {}."
+        if target.db.put_delay > 0:
+            self.ndb.busy = True
+            utils.delay(target.db.put_delay, 
+                        callback=self.remove_busy_flag, 
+                        retval=[put_done_message, target])
+        
+        # send custom messages to the room about the move
+        # need to bring this data in from wherever it is
+        if preposition:
+            caller_message = "You put {object} {preposition} {location}."
+            location_message = "{caller} puts {object} {preposition} {location}."
+        message_data = { "object" : target.name, "location" : target_location, "caller" : self, "preposition": preposition }
+        self.msg(caller_message.format(**message_data))
+        self.location.msg_contents(location_message.format(**message_data),
+                                     exclude=self)
+        
+        target.at_objput(putter=self)
+
+
+    def at_objput(self, putter=None):
+        """ This is called whenever someone puts this object.
+
+        Follows the same code pattern as at_desc, a function used by at_look
+        """
+        pass
+
+
+    def at_objput_from(self, putter=None, target=None, preposition=None):
+        """ This is called when 'put' is used on an object in this object.
+        """
+        pass
+
     
-    def at_touch(self, target):
+    def at_touch(self, target, target_location=None, preposition=None):
         """ Modelled after at_look, at_touch has its own lock: "touch"
 
         Ideally the multiple return control flow code pattern will be changed.
@@ -88,7 +256,7 @@ class ExtendedDefaultObject(object):
         pass
 
 
-    def at_focus(self, target):
+    def at_focus(self, target, target_location=None, preposition=None):
         """ Modelled after at_look, at_focus has its own lock: "focus"
         """
         if not target.access(self, "focus"):
@@ -108,7 +276,7 @@ class ExtendedDefaultObject(object):
             self.ndb.busy = True
             utils.delay(target.db.focus_delay, 
                         callback=self.remove_busy_flag, 
-                        retval=[touch_done_message, target])
+                        retval=[focus_done_message, target])
 
         target.at_focused(focuser=self)
 
@@ -125,7 +293,7 @@ class ExtendedDefaultObject(object):
         pass
 
 
-    def at_read(self, target):
+    def at_read(self, target, target_location=None, preposition=None):
         """ Modelled after at_look, at_read has its own lock: "read"
         """
         if not target.access(self, "read"):
@@ -151,7 +319,7 @@ class ExtendedDefaultObject(object):
             self.ndb.busy = True
             utils.delay(target.db.read_delay, 
                         callback=self.remove_busy_flag, 
-                        retval=[touch_done_message, target])
+                        retval=[read_done_message, target])
 
             target.at_objectread(reader=self)
 
@@ -166,13 +334,93 @@ class ExtendedDefaultObject(object):
         pass
 
 
-    def at_put(self, putter):
-        """ called after an object has been put in a container. Does not stop put.
+    # below is the default at_look handlers from evennia/objects/objects.py
+    
+    # look can be retrofitted for the at_command style actions.
+    # the code pattern used to filter visible objects may be helpful
+    # for filtering by preposition/sublocation in the generic commands
+    # the idea would be to first filter by sublocation then run a search
+    # on the filtered list.
+
+    # search() takes a list in its location, so we could technically build
+    # a custom list then use the default search. this is the swiftest route.
+
+    def return_appearance(self, looker):
+        """
+        This formats a description. It is the hook a 'look' command
+        should call.
+
+        Args:
+            looker (Object): Object doing the looking.
+        """
+        if not looker:
+            return
+        # get and identify all objects
+        visible = (obj for obj in self.contents 
+                if obj != looker and
+                obj.access(looker, "view"))
+
+        exits, users, things = [], [], []
+        for obj in visible:
+            key = obj.get_display_name(looker)
+            if obj.destination:
+                exits.append(key)
+            elif obj.has_player:
+                users.append("{c%s{n" % key)
+            else:
+                things.append(key)
+        # get description, build string
+        string = "{c%s{n\n" % self.get_display_name(looker)
+        desc = self.db.desc
+        if desc:
+            string += "%s" % desc
+        if exits:
+            string += "\n{wExits:{n " + ", ".join(exits)
+        if users or things:
+            string += "\n{wYou see:{n " + ", ".join(users + things)
+        return string
+
+    def at_look(self, target):
+        """
+        Called when this object performs a look. It allows to
+        customize just what this means. It will not itself
+        send any data.
+
+        Args:
+            target (Object): The target being looked at. This is
+                commonly an object or the current location. It will
+                be checked for the "view" type access.
+
+        Returns:
+            lookstring (str): A ready-processed look string
+                potentially ready to return to the looker.
+
+        """
+        if not target.access(self, "view"):
+            try:
+                return "Could not view '%s'." % target.get_display_name(self)
+            except AttributeError:
+                return "Could not view '%s'." % target.key
+
+        description = target.return_appearance(self)
+
+        # the target's at_desc() method.
+        # this must be the last reference to target so it may delete itself when acted on.
+        target.at_desc(looker=self)
+
+        return description
+
+    def at_desc(self, looker=None):
+        """
+        This is called whenever someone looks at this object.
+
+        looker (Object): The object requesting the description.
+
         """
         pass
 
 
-class Object(DefaultObject, ExtendedDefaultObject):
+class Object(ExtendedDefaultObject, DefaultObject):
     """
     This is the root typeclass object, implementing an in-game Evennia
     game object, such as having a location, being able to be
@@ -320,8 +568,8 @@ class Object(DefaultObject, ExtendedDefaultObject):
 
      """
     def at_object_creation(self):
-        self.db.weight = 1
-
-
+        """
+        """
+        super(Object, self).at_object_creation()
 
 
