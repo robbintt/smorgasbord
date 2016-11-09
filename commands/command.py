@@ -9,10 +9,6 @@ from evennia import Command as BaseCommand
 
 from evennia import default_cmds, utils
 
-# used by CmdGet which is plucked and modded from evennia.commands.default.general
-from evennia import settings
-COMMAND_DEFAULT_CLASS = utils.class_from_module(settings.COMMAND_DEFAULT_CLASS)
-
 class Command(BaseCommand):
     """
     Inherit from this if you want to create your own command styles
@@ -383,9 +379,10 @@ class CmdTouch(CmdObjectInteraction):
 class CmdGet(CmdObjectInteraction):
     """ Use middleware to provide CmdGet.
 
-    In a sense, get is a weak 'put'.
-    Get just puts the item in caller.
-    Consider this when structuring at_get and at_put
+    A number of convenience aliases could exist for get.
+    'get first|second|1|2|last in bag' - get the positional item in a bag
+    positional gets would not require specifying what item it is. are 
+    objects stored in a list in containers currently? it should be for inv mgmt.
     """
     key = "get"
     aliases = "take"
@@ -397,10 +394,6 @@ class CmdGet(CmdObjectInteraction):
 
 class CmdPut(CmdObjectInteraction):
     """ Use middleware to provide CmdPut.
-
-    In a sense, get is a weak 'put'.
-    Get just puts the item in caller.
-    Consider this when structuring at_get and at_put
     """
     key = "put"
     at_caller = "at_put"
