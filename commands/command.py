@@ -239,7 +239,7 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
         self.command_requires_preposition = False
         self.error_command_requires_preposition = "This command requires a location."
         self.error_location_notexist = "Can't find the location of the object."
-        self.error_locationpreposition_notexist = "You can't quite get that to work."
+        self.error_locationpreposition_notexist = "Nothing could fit there."
         self.caller_busy_error = "You are a little busy for that."
         self.targetless_allowed = False
         self.target = None
@@ -298,18 +298,23 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
             # sent 'empty' and the command is allowed to be empty
             if not target:
                 target = self.caller.search(self.args)
+            # if a target still isn't found
             if not target:
                 self.caller.msg(self.object_notexist_error)
                 return
 
         # If a preposition is necessary, this route handles args and errors
         elif preposition_count == 1:
+            # hack: add a leading space to self.args so that if the preposition is the
+            # first argument, it can be easily found. All spaces are stripped later.
+            self.args = " " + self.args
+
             preposition = prepositions[0]
             preposition_parsed = " " + preposition + " "
             target_object, _prep, target_location = self.args.partition(preposition_parsed)
             target_object = target_object.strip()
             target_location = target_location.strip()
-
+            
             location = self.caller.search(target_location)
             if not location:
                 self.caller.msg(self.error_location_notexist)
@@ -319,11 +324,21 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
                     and obj.db.sublocation == preposition]
 
             # switch the location and the source if the command is a 'put'
+            # would prefer to separate this functionality
             if self.key == "put":
                 # optionally the location could be the caller
                 # this would turn off 'put' from the ground
                 target = self.caller.search(target_object)
-            # every command other than 'put' uses this else statement
+                
+            # look has a special case of lacking target_object
+            # in other words, 'look in y' is valid
+            elif self.key == "look" and not target_object:
+                # retarget a look command of the form 'look in y'
+                # (look command with no target_object)
+                target = location
+                location = None
+                
+            # the default object interaction 'touch x in y'
             else:
                 # contents is location.contents filtered by preposition
                 target = self.caller.search(target_object, candidates=contents)
@@ -336,9 +351,11 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
             # also, it may make a preposition a requirement for accessing a
             # container. Is this good enough?
             # things can be in things but inaccessible. good!
-            if preposition not in location.db.prepositions:
+            if (location and preposition not in location.db.prepositions) or \
+                (not location and preposition not in target.db.prepositions):
                 self.caller.msg(self.error_locationpreposition_notexist)
                 return
+
 
             # disallowed_prepositions and error_preposition_disallowed should be
             # set in the child Command class. An example would be if you don't
