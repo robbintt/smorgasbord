@@ -27,6 +27,8 @@ A smorgasbord of features to be mixed into a future game world.
 2. Containers: get x in y, put x in y
     1. Override search language (maybe a silent or quiet flag on search with a custom caller.msg
     2. Add look_in to view stuff inside stuff.
+        - Add the grammar for this preposition (DONE)
+        - Add special views when there is a prepositon in at_look and related response functions.
     3. Implement 'my' adjective
         - Currently self locations override ground locations preventing (or confusing?) ground access on items with the same name as held items.
         - 'get my sword in my sheath' should be equivalent to 'get sword in my sheath'.
@@ -37,11 +39,37 @@ A smorgasbord of features to be mixed into a future game world.
         - volume limit
         - quantity limit
         - locks/permissions
-    5. Generalize the at_got and at_got_from 'style' of response function
-        1. Some parts of this can be generic but a lot is customized.
+      
+
+3. De-abstraction: 'look' and 'put' are different grammars than CmdObjectInteraction.
+    1. Extract 'look' from CmdObjectInteraction
+        - Maintains most of the same code, but has these forms:
+            1. 'look'
+            2. 'look x'
+            3. 'look x in y'
+            4. 'look in y'
+    2. Extract 'put' from CmdObjectInteraction
+        - Maintains the same code, but switches the object and the location
+        - Switching object and location here maintains the abstractions for:
+            - at_put
+            - at_objput
+            - at_objput_from
+    3. Notes pasted from elsewhere:
+        1. Generalize the at_got and at_got_from 'style' of response function
+        2. Some parts of this can be generic but a lot is customized.
             - put, get, and look all behave in very precise ways
             - the locations of both objects may need to be checked or given the ability to interject. This is already defined for get/put. 
-      
+
+
+4. Generalize the three response functions:
+    1. Abstract the custom functions for all object interactions.
+        - Since they all must be overridden, it is unclear how much abstraction is done.
+        - It may be that every new registered CmdObjectInteraction 'command' will need to have its three response functions manually added to ExtendedDefaultObject.
+        - WRITE: a howto for manually adding all parts of a new CmdObjectInteraction command.
+    1. The following items should all have a say in how an object interaction goes:
+        - Acting object, acted on object, object container
+    2. What about the acting object's container?
+    
 
 ### Goals
 
