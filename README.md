@@ -8,7 +8,7 @@ A smorgasbord of features to be mixed into a future game world.
 1. look: Reconstruct specialized object look methods
     1. Inside Items (anything with contents)
         - need special parsing for "look in X"
-        - use parsing for code from put/get
+        - query each object for sublocation to build view based on preposition
         - Preposition/sublocation: "in", "under", "behind", "on"
         - Need specific view for each sublocation
         - Optional: comprehensive view (inspect object or something)
