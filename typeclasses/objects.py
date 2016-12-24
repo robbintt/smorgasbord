@@ -334,19 +334,12 @@ class ExtendedDefaultObject(object):
         pass
 
 
-    # below is the default at_look handlers from evennia/objects/objects.py
-    
-    # look can be retrofitted for the at_command style actions.
-    # the code pattern used to filter visible objects may be helpful
-    # for filtering by preposition/sublocation in the generic commands
-    # the idea would be to first filter by sublocation then run a search
-    # on the filtered list.
-
-    # search() takes a list in its location, so we could technically build
-    # a custom list then use the default search. this is the swiftest route.
 
     def return_appearance(self, looker):
-        """
+        """ This is still the default return_appearance from evennia
+
+        Return appearance will probably be retrofitted for CmdObjectInteraction
+        
         This formats a description. It is the hook a 'look' command
         should call.
 
@@ -380,8 +373,26 @@ class ExtendedDefaultObject(object):
             string += "\n{wYou see:{n " + ", ".join(users + things)
         return string
 
-    def at_look(self, target):
-        """
+    def at_look(self, target, target_location=None, preposition=None):
+        """ arguments retrofitted for CmdObjectInteraction compatability
+
+        target_location, preposition are currently unused, the code is still
+        the original code from evennia
+
+        at_look and at_desc should be fully retrofitted to manage views
+        there are numerous ideas on how to manage view interactions in:
+        - README.md
+        - this docstring
+        
+        # look can be retrofitted for the at_command style actions.
+        # the code pattern used to filter visible objects may be helpful
+        # for filtering by preposition/sublocation in the generic commands
+        # the idea would be to first filter by sublocation then run a search
+        # on the filtered list.
+
+        # search() takes a list in its location, so we could technically build
+        # a custom list then use the default search. this is the swiftest route.
+
         Called when this object performs a look. It allows to
         customize just what this means. It will not itself
         send any data.
@@ -396,6 +407,14 @@ class ExtendedDefaultObject(object):
                 potentially ready to return to the looker.
 
         """
+        # handle empty target. this functionality is from the original CmdLook
+        # the 'else' condition is probably not possible; defensive coding only
+        if not target:
+            if not self.location:
+                return "You have no location to look at."
+            else:
+                return "Look at what?"
+
         if not target.access(self, "view"):
             try:
                 return "Could not view '%s'." % target.get_display_name(self)

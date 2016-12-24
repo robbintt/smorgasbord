@@ -36,6 +36,27 @@ See the `@spawn` command and `evennia.utils.spawner` for more info.
 
 """
 
+WAND = {
+  "key": "wand",
+  "typeclass" : "typeclasses.items.magicitems.MagicalWand"
+}
+
+BACKPACK = {
+  "key": "backpack",
+  "typeclass" : "typeclasses.items.items.Container"
+}
+
+BOOKSHELF = {
+  "key": "bookshelf",
+  "typeclass" : "typeclasses.items.items.Furniture"
+}
+
+CABINET = {
+  "key": "cabinet",
+  "typeclass" : "typeclasses.items.items.FurnitureContainer"
+}
+
+
 #from random import randint
 #
 #GOBLIN = {

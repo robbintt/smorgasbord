@@ -36,20 +36,16 @@ class Container(Object):
         self.db.prepositions += ["in"]
 
 
-class Bag(Container):
-    """ A generic bag that doesn't have any special features or restrictions
-    """
-    pass
-
-class FurnitureBag(Furniture, Container):
+class FurnitureContainer(Object):
     """ A generic furniture that is also a container
-
-    This won't quite work because at_object_creation will be taken from the
-    first class, not both classes.
     """
     def at_object_creation(self):
         """
         """
-        super(FurnitureBag, self).at_object_creation()
+        super(FurnitureContainer, self).at_object_creation()
+        self.locks.add("get:false()")
+        self.locks.add("put:false()")
+        self.locks.add("touch:all()")
+        self.db.prepositions += ["behind", "under", "on", "in"]
 
 

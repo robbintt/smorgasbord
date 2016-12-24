@@ -241,6 +241,8 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
         self.error_location_notexist = "Can't find the location of the object."
         self.error_locationpreposition_notexist = "You can't seem to get there on that."
         self.caller_busy_error = "You are a little busy for that."
+        self.targetless_allowed = False
+        self.target = None
 
 
     def func(self):
@@ -249,15 +251,27 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
         getattr is used to get the response of the caller's at_ function. The
         function name is contained in the at_caller string.
         """
-
+        # ensure target is at least set from default
+        # in the future it may be helpful to rebuild this control flow so
+        # that different targets take precedence
+        # right now the target is inferred by the control flow below
+        target = self.target
         
+        # a default variable check here could make busy optional. 
+        # maybe there is a better place though.
         if self.caller.ndb.busy:
             self.caller.msg(self.caller_busy_error)
             return
         
         if not self.args:
-            self.caller.msg(self.no_object_given_error)
-            return
+            if self.targetless_allowed:
+                # use the location as a target, this may not solve all cases...
+                # make sure that at_(whatever) can manage target=None
+                # in the case that the character has no location
+                target = self.caller.location
+            else:
+                self.caller.msg(self.no_object_given_error)
+                return
 
         # parse args for prepositions received by location
         # we need to know the location to know if it accepts the preposition
@@ -279,7 +293,11 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
                 self.caller.msg(self.error_command_requires_preposition)
                 return
 
-            target = self.caller.search(self.args)
+            # only try to set the target if it is not already set
+            # currently it would only have been set if the command was
+            # sent 'empty' and the command is allowed to be empty
+            if not target:
+                target = self.caller.search(self.args)
             if not target:
                 self.caller.msg(self.object_notexist_error)
                 return
@@ -335,6 +353,7 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
 
 
         # this needs to happen last so each object can delete itself
+        # note that if the target is the location then the target=target_location
         at_caller_function = getattr(self.caller, self.at_caller)
         self.msg(at_caller_function(
             target, 
@@ -385,7 +404,7 @@ class CmdGet(CmdObjectInteraction):
     objects stored in a list in containers currently? it should be for inv mgmt.
     """
     key = "get"
-    aliases = "take"
+    aliases = ["take"]
     at_caller = "at_get"
     def __init__(self):
         super(CmdGet, self).__init__()
@@ -401,3 +420,16 @@ class CmdPut(CmdObjectInteraction):
         super(CmdPut, self).__init__()
         self.object_notexist_error = "Put what?"
         self.no_object_given_error = self.object_notexist_error
+
+class CmdLook(CmdObjectInteraction):
+    """ Use middleware to provide CmdPut.
+    """
+    key = "look"
+    aliases = ["l", "ls", "look at"]
+    at_caller = "at_look"
+    # this currently changes the target to the room
+    def __init__(self):
+        super(CmdLook, self).__init__()
+        self.object_notexist_error = "Look at what?"
+        self.no_object_given_error = self.object_notexist_error
+        self.targetless_allowed = True
