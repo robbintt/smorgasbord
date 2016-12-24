@@ -3,28 +3,49 @@
 A smorgasbord of features to be mixed into a future game world.
 
 
-### Goals
+### Current Projects
 
-0. Containers: get_in and put_in
-    0. Add a 'my' directive to get and put to locations on yourself.
-        - Currently self locations override ground locations preventing ground access on items with the same name as held items.
+1. look: Reconstruct specialized object look methods
+    1. Inside Items (anything with contents)
+        - need special parsing for "look in X"
+        - use parsing for code from put/get
+        - Preposition/sublocation: "in", "under", "behind", "on"
+        - Need specific view for each sublocation
+        - Optional: comprehensive view (inspect object or something)
+    2. Rooms
+        - Detect if an object is a room and give a consistent view
+    3. Items
+        - Give a consistent, simple description
+    4. Characters (PC and NPC identical)
+        - Itemized description: eyes, hair, skin, face, height, build
+        - visible status effects
+        - demeanor
+        - worn items
+        - equipped items
+
+
+2. Containers: get x in y, put x in y
     1. Override search language (maybe a silent or quiet flag on search with a custom caller.msg
-    2. Add 'put' lock on rooms and characters.
-    3. Add listener methods like at_touched and at_desc that allow the container to give a custom response.
-    4. Consider tests on the container being get_in'd
-    5. Add tests -- currently anything can be gotten from anything (or put_in once the pattern is established.
-        - weight
-        - volume
-        - locks / permissions
-    6. Add look_in to view stuff inside stuff.
-    7. 'get sword in my sheath' should be equivalent to 'get sword in my sheath'.
+    2. Add look_in to view stuff inside stuff.
+    3. Implement 'my' adjective
+        - Currently self locations override ground locations preventing (or confusing?) ground access on items with the same name as held items.
+        - 'get my sword in my sheath' should be equivalent to 'get sword in my sheath'.
         - Consider implementing 'get my sword' which searches all your top level objects for the first sword.
-    8. Add inventory limits at some point. Move this task when necessary.
+    4. Add inventory limits at some point. Move this task when necessary.
         - These limits COULD be used as an equip system
         - weight limit
         - volume limit
         - quantity limit
+        - locks/permissions
+    5. Generalize the at_got and at_got_from 'style' of response function
+        1. Some parts of this can be generic but a lot is customized.
+            - put, get, and look all behave in very precise ways
+            - the locations of both objects may need to be checked or given the ability to interject. This is already defined for get/put. 
       
+
+### Goals
+
+
 
 1. Player Body
     1. Player should have body parts
@@ -44,6 +65,7 @@ A smorgasbord of features to be mixed into a future game world.
     5. Implementation:
         1. There should be a body part class
         2. Body parts can inherit from that class and become persistent_attributes
+    6. Consider using container prepositions for body equip zones
     
 
 2. Indefinite articles in 'touch' events.
@@ -58,7 +80,7 @@ A smorgasbord of features to be mixed into a future game world.
     2. See [`tags` article](https://github.com/evennia/evennia/wiki/Tags)
     3. Then you can search the world for unique items.
 
-4. 'focus' and 'touch'
+4. 'focus' and 'touch' - event message order
     - The `at_focused` and `at_touched` currently emit player touch output after these events fire.
         - The effect is that an event like being poisoned fires before the touch is announced.
 
@@ -66,6 +88,7 @@ A smorgasbord of features to be mixed into a future game world.
     - Disable all standard chat and broadcasting on Player
     - Add a local chat channel with a different magic item and consider how to use.
     - Use the 'think' verb for chatting.
+    - consider using zones/tags on locations?
 
 6. First spell to implement - player viewer
     - Cast it on a player and you can view whatever they view
@@ -100,7 +123,6 @@ A smorgasbord of features to be mixed into a future game world.
         - otherwise 'a' and 'an' are based on the first letter.
         - 'some' is a special case, some beer, some water. A very vague one. 'a water' just will not do.
 
-11. Add more than one `aliases` to a command. See `get` which has `aliases="take"` for an example
 
 ### Notes
 
