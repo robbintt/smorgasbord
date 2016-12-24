@@ -239,7 +239,7 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
         self.command_requires_preposition = False
         self.error_command_requires_preposition = "This command requires a location."
         self.error_location_notexist = "Can't find the location of the object."
-        self.error_locationpreposition_notexist = "You can't seem to get there on that."
+        self.error_locationpreposition_notexist = "You can't quite get that to work."
         self.caller_busy_error = "You are a little busy for that."
         self.targetless_allowed = False
         self.target = None
