@@ -27,6 +27,26 @@ class ExtendedDefaultObject(object):
         self.db.prepositions = list()
         self.db.sublocation = None
 
+
+    def get_object_article(self):
+        """ return the appropriate article for a given object
+
+        Note: the exceptions list is exact object names. It is a very
+        inefficent way to manage exceptions because each name needs added
+        explicitly.  For example "idle hour" and "fast hour" both need to
+        be added separately.
+        """
+        article = "a"
+
+        exceptions = ["hour"]
+        vowels = ['a', 'e', 'i', 'o', 'u']
+
+        if self.name[0] in vowels or self.name in exceptions:
+            article = "an"
+
+        return article
+        
+
     def remove_busy_flag(self, retval):
         """ Removes the busy flag from the caller object
 
@@ -334,49 +354,9 @@ class ExtendedDefaultObject(object):
         pass
 
 
-
-    def return_appearance(self, looker):
-        """ This is still the default return_appearance from evennia
-
-        Return appearance will probably be retrofitted for CmdObjectInteraction
-        
-        This formats a description. It is the hook a 'look' command
-        should call.
-
-        Args:
-            looker (Object): Object doing the looking.
-        """
-        if not looker:
-            return
-        # get and identify all objects
-        visible = (obj for obj in self.contents 
-                if obj != looker and
-                obj.access(looker, "view"))
-
-        exits, users, things = [], [], []
-        for obj in visible:
-            key = obj.get_display_name(looker)
-            if obj.destination:
-                exits.append(key)
-            elif obj.has_player:
-                users.append("{c%s{n" % key)
-            else:
-                things.append(key)
-        # get description, build string
-        string = "{c%s{n\n" % self.get_display_name(looker)
-        desc = self.db.desc
-        if desc:
-            string += "%s" % desc
-        if exits:
-            string += "\n{wExits:{n " + ", ".join(exits)
-        if users or things:
-            string += "\n{wYou see:{n " + ", ".join(users + things)
-        return string
-
     def at_look(self, target, target_location=None, preposition=None):
         """ arguments retrofitted for CmdObjectInteraction compatability
 
-        target_location, preposition are currently unused, the code is still
         the original code from evennia
 
         at_look and at_desc should be fully retrofitted to manage views
@@ -421,15 +401,74 @@ class ExtendedDefaultObject(object):
             except AttributeError:
                 return "Could not view '%s'." % target.key
 
-        description = target.return_appearance(self)
+        description = target.return_appearance(self, preposition)
 
         # the target's at_desc() method.
         # this must be the last reference to target so it may delete itself when acted on.
-        target.at_desc(looker=self)
+        target.at_desc(self, preposition)
 
         return description
 
-    def at_desc(self, looker=None):
+
+    def return_appearance(self, looker, preposition=None):
+        """ This is still the default return_appearance from evennia
+
+        Return appearance will probably be retrofitted for CmdObjectInteraction
+        
+        This formats a description. It is the hook a 'look' command
+        should call.
+
+        Args:
+            looker (Object): Object doing the looking.
+        """
+        if not looker:
+            return
+
+        # Assemble view components from appearance classes
+        import inspect
+        classes = [x.__name__ for x in inspect.getmro(self.__class__)]
+
+        # if self is a room, keep the original display method 
+        if "Room" in classes:
+            # get and identify all objects
+            visible = (obj for obj in self.contents 
+                    if obj != looker and
+                    obj.access(looker, "view"))
+
+            exits, users, things = [], [], []
+            for obj in visible:
+                key = obj.get_display_name(looker)
+                if obj.destination:
+                    exits.append(key)
+                elif obj.has_player:
+                    users.append("{c%s{n" % key)
+                else:
+                    things.append(key)
+            # get description, build string
+            string = "{c%s{n\n" % self.get_display_name(looker)
+            desc = self.db.desc
+            if desc:
+                string += "%s" % desc
+            if exits:
+                string += "\n{wExits:{n " + ", ".join(exits)
+            if users or things:
+                string += "\n{wYou see:{n " + ", ".join(users + things)
+            return string
+
+        # elif self is a container, use the preposition display method 
+
+        # elif self is a character, use a character display method 
+
+        # else use the simple "description only" display method
+        else:
+            desc = self.db.desc
+            if desc:
+                return str(desc)
+            else:
+                return "You see {} {}.".format(self.get_object_article(), str(self.get_display_name(looker)))
+
+
+    def at_desc(self, looker=None, preposition=None):
         """
         This is called whenever someone looks at this object.
 
