@@ -26,9 +26,9 @@ A smorgasbord of features to be mixed into a future game world.
 
 2. Containers: get x in y, put x in y
     1. Override search language (maybe a silent or quiet flag on search with a custom caller.msg
-    2. Add look_in to view stuff inside stuff.
+    2. Add look_in to view stuff inside stuff. (DONE)
         - Add the grammar for this preposition (DONE)
-        - Add special views when there is a prepositon in at_look and related response functions.
+        - Add special views when there is a prepositon in at_look and related response functions (DONE)
     3. Implement 'my' adjective
         - Currently self locations override ground locations preventing (or confusing?) ground access on items with the same name as held items.
         - 'get my sword in my sheath' should be equivalent to 'get sword in my sheath'.
@@ -70,6 +70,8 @@ A smorgasbord of features to be mixed into a future game world.
         - Acting object, acted on object, object container
     2. What about the acting object's container?
     
+
+5. Consider integrating the article function into the item description function
 
 ### Goals
 

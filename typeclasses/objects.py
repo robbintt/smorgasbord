@@ -421,6 +421,28 @@ class ExtendedDefaultObject(object):
         Args:
             looker (Object): Object doing the looking.
         """
+
+        def enumerate_contents():
+            ''' get and identify all objects
+            '''
+            visible = (obj for obj in self.contents 
+                    if obj != looker and
+                    obj.access(looker, "view"))
+
+            exits, users, things = [], [], []
+
+            # change these tests
+            for obj in visible:
+                if obj.destination:
+                    exits.append(obj)
+                elif obj.has_player:
+                    users.append("{c%s{n" % obj)
+                else:
+                    things.append(obj)
+
+            return exits, users, things
+
+
         if not looker:
             return
 
@@ -430,32 +452,34 @@ class ExtendedDefaultObject(object):
 
         # if self is a room, keep the original display method 
         if "Room" in classes:
-            # get and identify all objects
-            visible = (obj for obj in self.contents 
-                    if obj != looker and
-                    obj.access(looker, "view"))
 
-            exits, users, things = [], [], []
-            for obj in visible:
-                key = obj.get_display_name(looker)
-                if obj.destination:
-                    exits.append(key)
-                elif obj.has_player:
-                    users.append("{c%s{n" % key)
-                else:
-                    things.append(key)
+            exits, users, things = enumerate_contents()
+            # get description, build string
+            string = "{c%s{n\n" % self.get_display_name(looker)
+            desc = self.db.desc
+
+            if desc:
+                string += "%s" % desc
+            if exits:
+                string += "\n{wExits:{n " + ", ".join([exit.get_display_name(looker) for exit in exits])
+            if users or things:
+                string += "\n{wYou see:{n " + ", ".join([thing.get_display_name(looker) for thing in users+things])
+            return string
+
+        # elif self is a container, use the preposition display method 
+        if preposition:
+
+            exits, users, things = enumerate_contents()
+            sublocation_things = [thing for thing in things if thing.db.sublocation == preposition]
             # get description, build string
             string = "{c%s{n\n" % self.get_display_name(looker)
             desc = self.db.desc
             if desc:
                 string += "%s" % desc
-            if exits:
-                string += "\n{wExits:{n " + ", ".join(exits)
-            if users or things:
-                string += "\n{wYou see:{n " + ", ".join(users + things)
+            if things:
+                string += "\n{wYou see:{n " + ", ".join([thing.get_display_name(looker) for thing in sublocation_things])
             return string
 
-        # elif self is a container, use the preposition display method 
 
         # elif self is a character, use a character display method 
 
