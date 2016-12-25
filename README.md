@@ -1,47 +1,38 @@
 ### Purpose
 
-A smorgasbord of features to be mixed into a future game world.
+A smorgasbord of features to be mixed into a future game world. 
+
+Consider making a CPF for this project. The sub-projects are becoming more clear.
 
 
 ### Current Projects
 
-1. look: Reconstruct specialized object look methods
-    1. Inside Items (anything with contents)
-        - need special parsing for "look in X"
-        - query each object for sublocation to build view based on preposition
-        - Preposition/sublocation: "in", "under", "behind", "on"
-        - Need specific view for each sublocation
-        - Optional: comprehensive view (inspect object or something)
-    2. Rooms
-        - Detect if an object is a room and give a consistent view
-    3. Items
-        - Give a consistent, simple description
-    4. Characters (PC and NPC identical)
-        - Itemized description: eyes, hair, skin, face, height, build
-        - visible status effects
-        - demeanor
-        - worn items
-        - equipped items
+A bunch of current projects as they come into focus. They can be broken out as tasks become deeper or more complex.
+
+1. Characters Descriptions (PC and NPC identical)
+    - Itemized description: eyes, hair, skin, face, height, build
+    - visible status effects
+    - demeanor
+    - worn items
+    - equipped items
 
 
-2. Containers: get x in y, put x in y
-    1. Override search language (maybe a silent or quiet flag on search with a custom caller.msg
-    2. Add look_in to view stuff inside stuff. (DONE)
-        - Add the grammar for this preposition (DONE)
-        - Add special views when there is a prepositon in at_look and related response functions (DONE)
-    3. Implement 'my' adjective
-        - Currently self locations override ground locations preventing (or confusing?) ground access on items with the same name as held items.
-        - 'get my sword in my sheath' should be equivalent to 'get sword in my sheath'.
-        - Consider implementing 'get my sword' which searches all your top level objects for the first sword.
-    4. Add inventory limits at some point. Move this task when necessary.
-        - These limits COULD be used as an equip system
+2. Add inventory limits at some point. Move this task when necessary.
+    1. limit options:
         - weight limit
         - volume limit
         - quantity limit
         - locks/permissions
-      
+    2. These limits COULD be used as an equip system
 
-3. De-abstraction: 'look' and 'put' are different grammars than CmdObjectInteraction.
+
+3. Implement 'my' adjective
+    - Currently self locations override ground locations preventing (or confusing?) ground access on items with the same name as held items.
+    - 'get my sword in my sheath' should be equivalent to 'get sword in my sheath'.
+    - Consider implementing 'get my sword' which searches all your top level objects for the first sword.
+
+
+4. De-abstraction: 'look' and 'put' are different grammars than CmdObjectInteraction.
     1. Extract 'look' from CmdObjectInteraction
         - Maintains most of the same code, but has these forms:
             1. 'look'
@@ -61,7 +52,7 @@ A smorgasbord of features to be mixed into a future game world.
             - the locations of both objects may need to be checked or given the ability to interject. This is already defined for get/put. 
 
 
-4. Generalize the three response functions:
+5. Generalize the three response functions:
     1. Abstract the custom functions for all object interactions.
         - Since they all must be overridden, it is unclear how much abstraction is done.
         - It may be that every new registered CmdObjectInteraction 'command' will need to have its three response functions manually added to ExtendedDefaultObject.
@@ -71,11 +62,33 @@ A smorgasbord of features to be mixed into a future game world.
     2. What about the acting object's container?
     
 
-5. Consider integrating the article function into the item description function
+6. Consider integrating the article function into the item description function
+
+
+### Done or Mostly Done Projects
+
+1. Containers: get x in y, put x in y
+    1. Override search language (maybe a silent or quiet flag on search with a custom caller.msg) 
+        - In what cases do I want to override this language?
+            -
+    2. Add look_in to view stuff inside stuff. (DONE)
+        - Add the grammar for this preposition (DONE)
+        - Add special views when there is a prepositon in at_look and related response functions (DONE)
+      
+2. look: Reconstruct specialized object look methods
+    1. Inside Items (anything with contents)
+        - need special parsing for "look in X"
+        - query each object for sublocation to build view based on preposition
+        - Preposition/sublocation: "in", "under", "behind", "on"
+        - Need specific view for each sublocation
+        - Optional: comprehensive view (inspect object or something)
+    2. Rooms
+        - Detect if an object is a room and give a consistent view
+    3. Items
+        - Give a consistent, simple description
+
 
 ### Goals
-
-
 
 1. Player Body
     1. Player should have body parts

@@ -238,7 +238,7 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
         self.error_too_many_prepositions = "Please use only one preposition from: {}".format(self.COMMAND_PREPOSITIONS)
         self.command_requires_preposition = False
         self.error_command_requires_preposition = "This command requires a location."
-        self.error_location_notexist = "Can't find the location of the object."
+        self.error_location_notexist = "You cannot locate that."
         self.error_locationpreposition_notexist = "Nothing could fit there."
         self.caller_busy_error = "You are a little busy for that."
         self.targetless_allowed = False
