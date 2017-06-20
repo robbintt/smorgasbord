@@ -64,6 +64,11 @@ A bunch of current projects as they come into focus. They can be broken out as t
 
 6. Consider integrating the article function into the item description function
 
+7. Game instances would need to be spawnable per character or something.
+    1. Allows regulation of loot
+        - one time instance versus repeating instance
+        - shared locations on respawn timers?
+
 
 ### Done or Mostly Done Projects
 
