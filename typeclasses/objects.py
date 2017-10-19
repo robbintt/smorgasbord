@@ -22,6 +22,11 @@ class ExtendedDefaultObject(object):
     """
     def at_object_creation(self):
         """ This overloads the DefaultObject at_object_creation, which is empty.
+
+        weight: a arbitrary integer weight, something akin to ounces.
+        prepositions: possible sublocations in this object, only used if container
+        sublocation: a metadata 'orientation' 'inside' the object's container
+                     may be better stated as 'orientation'
         """
         self.db.weight = 1
         self.db.prepositions = list()
@@ -31,10 +36,18 @@ class ExtendedDefaultObject(object):
     def get_object_article(self):
         """ return the appropriate article for a given object
 
-        Note: the exceptions list is exact object names. It is a very
+        Note: 
+        the exceptions list is exact object names. It is a very
         inefficent way to manage exceptions because each name needs added
         explicitly.  For example "idle hour" and "fast hour" both need to
         be added separately.
+
+        Future: 
+        1. change this exceptions list to only refer to the first word 
+            of the tested object
+        2. manage article using a global list of objects with 'an' prefixes
+        3. the global list takes priority
+
         """
         article = "a"
 
@@ -466,7 +479,7 @@ class ExtendedDefaultObject(object):
                 string += "\n{wYou see:{n " + ", ".join([thing.get_display_name(looker) for thing in users+things])
             return string
 
-        # elif self is a container, use the preposition display method 
+        # if self is a container, use the preposition display method 
         if preposition:
 
             exits, users, things = enumerate_contents()
