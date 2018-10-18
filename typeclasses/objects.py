@@ -449,7 +449,7 @@ class ExtendedDefaultObject(object):
                 if obj.destination:
                     exits.append(obj)
                 elif obj.has_account:
-                    users.append("{c%s{n" % obj)
+                    users.append("%s" % obj)
                 else:
                     things.append(obj)
 
@@ -468,7 +468,7 @@ class ExtendedDefaultObject(object):
 
             exits, users, things = enumerate_contents()
             # get description, build string
-            string = "{c%s{n\n" % self.get_display_name(looker)
+            string = "%s\n" % self.get_display_name(looker)
             desc = self.db.desc
 
             if desc:
@@ -485,7 +485,7 @@ class ExtendedDefaultObject(object):
             exits, users, things = enumerate_contents()
             sublocation_things = [thing for thing in things if thing.db.sublocation == preposition]
             # get description, build string
-            string = "{c%s{n\n" % self.get_display_name(looker)
+            string = "%s\n" % self.get_display_name(looker)
             desc = self.db.desc
             if desc:
                 string += "%s" % desc
