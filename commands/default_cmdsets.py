@@ -14,6 +14,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 
 """
 from evennia import default_cmds
+#from evennia.commands import default
 
 from commands.command import CmdTouch, CmdFocus, CmdRead, CmdGet, CmdPut, CmdLook
 
@@ -41,7 +42,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdLook())
 
 
-class PlayerCmdSet(default_cmds.PlayerCmdSet):
+#class PlayerCmdSet(default_cmds.PlayerCmdSet):
+class AccountCmdSet(default_cmds.AccountCmdSet):
     """
     This is the cmdset available to the Player at all times. It is
     combined with the `CharacterCmdSet` when the Player puppets a
@@ -54,7 +56,7 @@ class PlayerCmdSet(default_cmds.PlayerCmdSet):
         """
         Populates the cmdset
         """
-        super(PlayerCmdSet, self).at_cmdset_creation()
+        super(AccountCmdSet, self).at_cmdset_creation()
         #
         # any commands you add below will overload the default ones.
         #

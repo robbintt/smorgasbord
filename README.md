@@ -1,3 +1,20 @@
+### ATTENTION
+
+#### Migrate from 0.6 to 0.7
+
+- Migrating from 0.6 to 0.7 has not really been done and it's supposed to be involved.
+    - guide from griatch: https://groups.google.com/forum/#!category-topic/evennia/evennia-news/0JYYNGY-NfE
+
+#### Migrate from 0.7 to 0.8
+
+- dunno!
+
+
+#### Player was removed and the class i used was renamed to account
+
+- i partially fixed this but did not clean the code up
+
+
 ### Purpose
 
 A smorgasbord of features to be mixed into a future game world. 
@@ -174,7 +191,7 @@ A bunch of current projects as they come into focus. They can be broken out as t
 
 ### Notes
 
-- `rlwrap telnet localhost 4000` - for line history in telnet
+- `rlwrap telnet 0.0.0.0 4000` - for line history in telnet, use 0.0.0.0 or `::` instead of localhost now
 - Make a detached room: `@create My Room Name:rooms.DefaultRoom` `@tel/tonone My Room Name`
 - (Griatch) The easiest way to do a global search for an object is to do `evennia.search_object("name")`
 - If evennia says it has hanging `pid` then go in the /server/ folder and remove the offending files.
@@ -190,6 +207,7 @@ A bunch of current projects as they come into focus. They can be broken out as t
     2. `mkdir server/logs`
     3. `evennia migrate`
     4. `evennia start`
+    5. use a dev admin user/pass: admin / password@
 - Reinitialize all objects - Potentially Destructive! - `@py for obj in evennia.ObjectDB.objects.all(): obj.at_object_creation()`
 - Reinitialize a certain class of objects - Potentially Destructive! - `@py from typeclasses.objects import Heavy; [obj.at_object_creation() for obj in Heavy.objects.all()]`
 
