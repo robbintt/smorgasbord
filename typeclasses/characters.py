@@ -1,7 +1,7 @@
 """
 Characters
 
-Characters are (by default) Objects setup to be puppeted by Players.
+Characters are (by default) Objects setup to be puppeted by Accounts.
 They are what you "see" in game. The Character class in this module
 is setup to be the "default" character type created by the default
 creation commands.
@@ -20,14 +20,14 @@ class Character(ExtendedDefaultObject, DefaultCharacter):
                     and its commands only be called by itself, not anyone else.
                     (to change things, use at_object_creation() instead).
     at_after_move - Launches the "look" command after every move.
-    at_post_unpuppet(player) -  when Player disconnects from the Character, we
+    at_post_unpuppet(account) -  when Account disconnects from the Character, we
                     store the current location in the pre_logout_location Attribute and
                     move it to a None-location so the "unpuppeted" character
-                    object does not need to stay on grid. Echoes "Player has disconnected" 
+                    object does not need to stay on grid. Echoes "Account has disconnected" 
                     to the room.
-    at_pre_puppet - Just before Player re-connects, retrieves the character's
+    at_pre_puppet - Just before Account re-connects, retrieves the character's
                     pre_logout_location Attribute and move it back on the grid.
-    at_post_puppet - Echoes "PlayerName has entered the game" to the room.
+    at_post_puppet - Echoes "AccountName has entered the game" to the room.
 
 
     Smorgasbord
@@ -70,7 +70,7 @@ class Character(ExtendedDefaultObject, DefaultCharacter):
 
             Basic Features:
             Body parts should be contents of the character and should 
-            have limited interactivity. For example, a player's arm
+            have limited interactivity. For example, an account's arm
             could be 'grab'-able, and eye should be 'poke'-able.
             Allowing these features creates a pretty complex brawl
             system that is beyond the scope of this class though.
@@ -80,10 +80,10 @@ class Character(ExtendedDefaultObject, DefaultCharacter):
             when a verb is available for interaction.
 
             Body Part vs. Inventory:
-            A player is an object and can have both body parts and inventory
-            items.  However, we don't want to put a player's body parts
-            in their backpack.  A player also shouldn't have an ethereal
-            'inventory'.  So a player should not be able to have items
+            An account is an object and can have both body parts and inventory
+            items.  However, we don't want to put an account's body parts
+            in their backpack.  An account also shouldn't have an ethereal
+            'inventory'.  So an account should not be able to have items
             'inside' them, e.g. they should not be a container.
             THIS MEANS WE NEED TO BUILD A RICHER CONTAINER TYPE AND TURN
             IT OFF BY DEFAULT. CONTAINER COULD BE TURNED OFF BY USING 
@@ -179,7 +179,7 @@ class Character(ExtendedDefaultObject, DefaultCharacter):
             this value is 'temporary lost max_hp'
             
             essential_to_live:
-            if True, if the body part is destroyed, the player should die
+            if True, if the body part is destroyed, the account should die
 
             idea - tattoos:
             ==============
@@ -212,10 +212,10 @@ class Character(ExtendedDefaultObject, DefaultCharacter):
             Limb Damage:
             ============
 
-            Certain limb damage may turn off command sets for the player. 
+            Certain limb damage may turn off command sets for the account. 
             This needs handled in a smart way.
 
-            Limb damage could also cause the player to drop items on that limb.
+            Limb damage could also cause the account to drop items on that limb.
             """
             self.db.essential_to_live = False
             self.db.max_health = 10000
@@ -228,7 +228,7 @@ class Character(ExtendedDefaultObject, DefaultCharacter):
                 Damage - Amount is negative
                 Healing - Amount is positive
 
-                Player can be messaged with an effect according to the:
+                Account can be messaged with an effect according to the:
                     - direction, negative or positive
                     - magnitude absolute or percentage of total
                     - any resulting effects or cancelled effects

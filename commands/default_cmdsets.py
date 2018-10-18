@@ -22,7 +22,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
     """
     The `CharacterCmdSet` contains general in-game commands like `look`,
     `get`, etc available on in-game Character objects. It is merged with
-    the `PlayerCmdSet` when a Player puppets a Character.
+    the `AccountCmdSet` when an Account puppets a Character.
     """
     key = "DefaultCharacter"
 
@@ -42,15 +42,15 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdLook())
 
 
-#class PlayerCmdSet(default_cmds.PlayerCmdSet):
+#class AccountCmdSet(default_cmds.AccountCmdSet):
 class AccountCmdSet(default_cmds.AccountCmdSet):
     """
-    This is the cmdset available to the Player at all times. It is
-    combined with the `CharacterCmdSet` when the Player puppets a
+    This is the cmdset available to the Account at all times. It is
+    combined with the `CharacterCmdSet` when the Account puppets a
     Character. It holds game-account-specific commands, channel
     commands, etc.
     """
-    key = "DefaultPlayer"
+    key = "DefaultAccount"
 
     def at_cmdset_creation(self):
         """

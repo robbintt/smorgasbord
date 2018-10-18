@@ -35,7 +35,7 @@ class CharacterGeneratorRoom(Room):
 
         health = self.db.char_health or 20
 
-        if character.has_player:
+        if character.has_account:
             character.db.health = health
             character.db.health_max = health
         

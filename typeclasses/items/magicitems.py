@@ -155,13 +155,13 @@ class SpellScroll(Object):
         """ Effects of reading the scroll
 
         By default the scroll will: 
-            1. pass the spell to the player's active spell slot
+            1. pass the spell to the account's active spell slot
             2. self destruct
         """
         self.delete()
 
 
 class HealingSpellScroll(SpellScroll):
-    """ Demo scroll for casting HealingSpell, a spell to improve player health
+    """ Demo scroll for casting HealingSpell, a spell to improve account health
     """
 
