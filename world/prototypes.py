@@ -37,23 +37,38 @@ See the `@spawn` command and `evennia.utils.spawner` for more info.
 """
 
 WAND = {
-  "key": "wand",
-  "typeclass" : "typeclasses.items.magicitems.MagicalWand"
+    "key": "wand",
+    "typeclass" : "typeclasses.items.magicitems.MagicalWand"
 }
 
 BACKPACK = {
-  "key": "backpack",
-  "typeclass" : "typeclasses.items.items.Container"
+    "key": "backpack",
+    "typeclass" : "typeclasses.items.items.Container"
 }
 
 BOOKSHELF = {
-  "key": "bookshelf",
-  "typeclass" : "typeclasses.items.items.Furniture"
+    "key": "bookshelf",
+    "typeclass" : "typeclasses.items.items.Furniture"
 }
 
 CABINET = {
-  "key": "cabinet",
-  "typeclass" : "typeclasses.items.items.FurnitureContainer"
+    "key": "cabinet",
+    "typeclass" : "typeclasses.items.items.FurnitureContainer"
+}
+
+FIRE = {
+    "key": "fire",
+    "typeclass" : "typeclasses.items.items.CampFire"
+}
+
+RAW_BACON = {
+    "key": "raw bacon",
+    "typeclass" : "typeclasses.items.items.Item"
+}
+
+COOKED_BACON = {
+    "key": "cooked bacon",
+    "typeclass" : "typeclasses.items.items.Item"
 }
 
 

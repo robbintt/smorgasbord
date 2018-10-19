@@ -200,11 +200,15 @@ class ExtendedDefaultObject(object):
         # location/room at_got_room() method performs checks
         # if any value is returned, abort before move
         # note that this returns an empty message:
-        #     at_got_from must tell the character what happened.
-        if target_location and target_location.at_objput_from( putter=self, 
+        #     at_objput_from must tell the character what happened.
+        # are these variable assignments right? is putter self?
+        if target_location:
+            # cannot short circuit - this function must run
+            if target_location.at_objput_from( putter=self, 
                                         target=target, 
                                         preposition=preposition):
-            return
+                # do not perform the move
+                return
         
         # perform the move
         target.move_to(target_location, quiet=True)
@@ -243,7 +247,10 @@ class ExtendedDefaultObject(object):
 
 
     def at_objput_from(self, putter=None, target=None, preposition=None):
-        """ This is called when 'put' is used on an object in this object.
+        """ This is called when an object is 'put' inside of this object
+
+        note that 'into' and 'inside' would be aliases for the 'in'
+        preposition (but are not implemented yet anyways)
         """
         pass
 
