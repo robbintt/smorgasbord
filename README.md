@@ -1,18 +1,17 @@
 ### ATTENTION
 
-#### Migrate from 0.6 to 0.7
+#### Migrate from 0.6 to 0.7 - DONE
 
-- Migrating from 0.6 to 0.7 has not really been done and it's supposed to be involved.
-    - guide from griatch: https://groups.google.com/forum/#!category-topic/evennia/evennia-news/0JYYNGY-NfE
+- guide from griatch: https://groups.google.com/forum/#!category-topic/evennia/evennia-news/0JYYNGY-NfE
 
-#### Migrate from 0.7 to 0.8
+#### Migrate from 0.7 to 0.8 - dunno but I am using 0.8
 
 - dunno!
 
 
 #### Player was removed and the class i used was renamed to account
 
-- i partially fixed this but did not clean the code up
+- i partially fixed this and used Griatch's find and replace script. I assume it's good now but could be wrong.
 
 
 ### Purpose
