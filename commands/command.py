@@ -230,6 +230,7 @@ class CmdObjectInteraction(default_cmds.MuxCommand):
         super(CmdObjectInteraction, self).__init__()
 
         # this does not belong here, it needs registered globally and imported.
+        # we also need preposition aliases aka "in" can be "into" "inside"
         self.COMMAND_PREPOSITIONS = ["in", "under", "behind", "on"]
         
         # put other sane defaults here so they don't need redefined
@@ -411,6 +412,15 @@ class CmdTouch(CmdObjectInteraction):
         self.object_notexist_error = "Touch what?"
         self.no_object_given_error = self.object_notexist_error
 
+class CmdStir(CmdObjectInteraction):
+    """ Use middleware to provide CmdStir
+    """
+    key = "stir"
+    at_caller = "at_stirred"
+    def __init__(self):
+        super(CmdStir, self).__init__()
+        self.object_notexist_error = "Stir what?"
+        self.no_object_given_error = self.object_notexist_error
 
 class CmdGet(CmdObjectInteraction):
     """ Use middleware to provide CmdGet.
