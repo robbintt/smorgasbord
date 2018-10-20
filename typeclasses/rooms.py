@@ -41,4 +41,4 @@ class CharacterGeneratorRoom(Room):
         
         if character.is_superuser:
             string = "-"*78 + "YOU ARE SUPERUSER" + "-"*78
-            character.msg("{r%s{n" % string.format(name=character.key, quell="{w@quell{r"))
+            character.msg("%s" % string.format(name=character.key, quell="@quell"))
