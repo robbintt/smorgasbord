@@ -332,6 +332,17 @@ class ExtendedDefaultObject(object):
         """
         pass
 
+    def at_stir(self, target, target_location=None, preposition=None):
+
+        target.at_stirred(stirrer=self)
+
+
+    def at_stirred(self, stirrer=None):
+        """ This is called whenever someone stirs this object.
+
+        Follows the same code pattern as at_desc, a function used by at_look
+        """
+        pass
 
     def at_read(self, target, target_location=None, preposition=None):
         """ Modelled after at_look, at_read has its own lock: "read"

@@ -416,7 +416,7 @@ class CmdStir(CmdObjectInteraction):
     """ Use middleware to provide CmdStir
     """
     key = "stir"
-    at_caller = "at_stirred"
+    at_caller = "at_stir"
     def __init__(self):
         super(CmdStir, self).__init__()
         self.object_notexist_error = "Stir what?"

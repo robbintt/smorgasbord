@@ -71,6 +71,11 @@ COOKED_BACON = {
     "typeclass" : "typeclasses.items.items.Item"
 }
 
+DENTED_COOKING_POT = {
+    "key": "dented cooking pot",
+    "typeclass" : "typeclasses.items.items.CookingPot"
+}
+
 
 #from random import randint
 #
