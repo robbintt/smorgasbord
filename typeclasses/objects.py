@@ -511,9 +511,9 @@ class ExtendedDefaultObject(object):
             if desc:
                 string += "%s" % desc
             if exits:
-                string += "\n{wExits:{n " + ", ".join([exit.get_display_name(looker) for exit in exits])
+                string += "\nExits: " + ", ".join([exit.get_display_name(looker) for exit in exits])
             if users or things:
-                string += "\n{wYou see:{n " + ", ".join([thing.get_display_name(looker) for thing in users+things])
+                string += "\nYou see: " + ", ".join([thing.get_display_name(looker) for thing in users+things])
             return string
 
         # if self is a container, use the preposition display method 
@@ -527,7 +527,7 @@ class ExtendedDefaultObject(object):
             if desc:
                 string += "%s" % desc
             if things:
-                string += "\n{wYou see:{n " + ", ".join([thing.get_display_name(looker) for thing in sublocation_things])
+                string += "\nYou see: " + ", ".join([thing.get_display_name(looker) for thing in sublocation_things])
             return string
 
 
