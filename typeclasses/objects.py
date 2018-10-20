@@ -151,7 +151,7 @@ class ExtendedDefaultObject(object):
         self.msg(caller_message.format(**message_data))
         self.location.msg_contents(location_message.format(**message_data),
                                      exclude=self)
-        
+
         target.at_got(getter=self)
         
 
@@ -333,6 +333,25 @@ class ExtendedDefaultObject(object):
         pass
 
     def at_stir(self, target, target_location=None, preposition=None):
+
+        if not target.access(self, "stir"):
+            try:
+                return "You could not stir the {}.".format(target.get_display_name(self),)
+            except AttributeError:
+                return "You could not stir the {}.".format(target.key,)
+
+        # add this in after testing the general feature
+        '''
+        # let the location this is stirred inside execute its response function
+        # shouldn't we also check if this is locked? same for at_move or whatever
+        if target_location:
+            # cannot short circuit - this function must run
+            if target_location.at_stirred_from( stirrer=self, 
+                                        target=target, 
+                                        preposition=preposition):
+                # do not perform the move
+                return
+        '''
 
         target.at_stirred(stirrer=self)
 

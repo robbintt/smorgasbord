@@ -56,9 +56,10 @@ CABINET = {
     "typeclass" : "typeclasses.items.items.FurnitureContainer"
 }
 
-FIRE = {
-    "key": "fire",
-    "typeclass" : "typeclasses.items.items.CampFire"
+CAMP_FIRE = {
+    "key": "campfire",
+    "typeclass" : "typeclasses.items.items.FurnitureContainer",
+    "crafting_types" : ["cooking"]
 }
 
 RAW_BACON = {
