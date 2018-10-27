@@ -21,6 +21,21 @@ A smorgasbord of features to be mixed into a future game world.
 Consider making a CPF for this project. The sub-projects are becoming more clear.
 
 
+### Reviewing Dragonrealms
+
+The game this is surrogating actually requires a pretty custom UI to play. This is something I would love to avoid by using a system of buffers.
+
+#### Special Features
+
+Dragonrealms has tons of features outside its object management. Although most of dragonrealms is object management.
+
+- crafting systems - we can do this easily, object synthesis/consumption
+- Roundtime - cooldown after doing many tasks
+- scaled training - a skills system that permanently improves things
+- magic system
+- combat system - both pc and npc-pc - what about npc-npc?
+
+
 ### Current Projects
 
 A bunch of current projects as they come into focus. They can be broken out as tasks become deeper or more complex.
@@ -194,6 +209,7 @@ A bunch of current projects as they come into focus. They can be broken out as t
 - Make a detached room: `@create My Room Name:rooms.DefaultRoom` `@tel/tonone My Room Name`
 - (Griatch) The easiest way to do a global search for an object is to do `evennia.search_object("name")`
 - If evennia says it has hanging `pid` then go in the /server/ folder and remove the offending files.
+    - they will end in `pid` so you can use: `rm *.pid`
 - [Ainneve](https://github.com/evennia/ainneve) - A full sample game
 - Admin can reload the server with `@reload`
 - The server remembers admin's `prelogout_location` by default and puts admin back
@@ -201,7 +217,7 @@ A bunch of current projects as they come into focus. They can be broken out as t
 - Persistent attributes: `prelogout_location`, `desc`, `health`, health_max`
     - Both health attributes are from my custom room, so it works.
 - The __server database is not under source control__.  If you wish to keep a server instance, back it up carefully.
-- To Regenerate from git repository
+- To Regenerate from git repository (only if cloning fresh)
     1. `evennia --initsettings`
     2. `mkdir server/logs`
     3. `evennia migrate`
